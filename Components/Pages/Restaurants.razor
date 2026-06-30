@@ -3,63 +3,69 @@
 
 <PageTitle>Restaurants</PageTitle>
 
-<h1><i class="bi bi-fork-knife me-2" aria-hidden="true"></i>Restaurants</h1>
+<h1>Restaurants</h1>
 
-@if (restaurants == null)
+@if (packages == null)
 {
     <p><em>Loading...</em></p>
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Name</th>
-                <th>Adress</th>
-                <th>Type</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var forecast in restaurants)
-            {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.Name</td>
-                    <td>@forecast.Date</td>
-                    <td>@forecast.Type</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="row g-3">
+        @foreach (var pkg in packages)
+        {
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">@pkg.Title</h5>
+                        <p class="card-text">@pkg.RestaurantName</p>
+                        <p class="card-text">Expira: @pkg.ExpiresAt.ToShortDateString()</p>
+                        <p class="card-text">
+                            <s>@pkg.OriginalPrice.ToString("0") lei</s>
+                            <strong>@pkg.DiscountedPrice.ToString("0") lei</strong>
+                        </p>
+                        <p class="card-text">Cantitate: @pkg.QuantityAvailable</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
 }
 
-
 @code {
-    private RestaurantsArray[]? restaurants;
+    private FoodPackageItem[]? packages;
 
     protected override async Task OnInitializedAsync()
     {
         await Task.Delay(500);
 
-        var startDate = DateOnly.FromDateTime(DateTime.Now);
-        var adresses = new[] { "123 Main St", "456 Elm St", "789 Oak St", "101 Maple Ave", "202 Pine Rd" };
-        var names = new[] { "The Cozy Corner", "Bistro Bliss", "Pizza Palace", "Dinner Delight", "Breakfast Bonanza" };
-        var types = new[] { "Small", "Bistro", "Pizza", "Dinner", "Breakfast"};
-        restaurants = Enumerable.Range(1, 5).Select(index => new RestaurantsArray
+        var restaurantNames = new[] { "Brutarie", "Brasserie", "Pizza", "Bisanco Bistro", "Fresh Corner" };
+        var titles = new[] { "Pachet patiserie", "Pachet meniul zilei", "Pachet pizza", "Pachet supe", "Pachet salate" };
+
+        packages = Enumerable.Range(1, 5).Select(index =>
+        {
+            var original = Random.Shared.Next(25, 70);
+            var discount = Random.Shared.Next(35, 65);
+
+            return new FoodPackageItem
             {
-                Date = startDate.AddDays(index),
-                Name = names [Random.Shared.Next(names.Length)],
-                Adress = adresses[Random.Shared.Next(adresses.Length)],
-                Type = types[Random.Shared.Next(types.Length)]
-            }).ToArray();
+                RestaurantName = restaurantNames[Random.Shared.Next(restaurantNames.Length)],
+                Title = titles[Random.Shared.Next(titles.Length)],
+                OriginalPrice = original,
+                DiscountedPrice = original * (100 - discount) / 100m,
+                QuantityAvailable = Random.Shared.Next(0, 5),
+                ExpiresAt = DateTime.Today.AddDays(Random.Shared.Next(0, 3))
+            };
+        }).ToArray();
     }
 
-    private class RestaurantsArray
+    private class FoodPackageItem
     {
-        public DateOnly Date { get; set; }
-        public string Name  { get; set; }
-        public string? Adress { get; set; }
-        public string Type { get; set; }
+        public string RestaurantName { get; set; } = "";
+        public string Title { get; set; } = "";
+        public decimal OriginalPrice { get; set; }
+        public decimal DiscountedPrice { get; set; }
+        public int QuantityAvailable { get; set; }
+        public DateTime ExpiresAt { get; set; }
     }
 }

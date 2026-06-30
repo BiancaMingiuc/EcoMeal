@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "8cbCvMLtQZI=",
+  "dgSpecHash": "L1DyiztqEU8=",
   "success": true,
   "projectFilePath": "C:\\Users\\bianc\\Desktop\\NetRom Summer Camp\\EcoMeal1\\EcoMeal1.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\bianc\\.nuget\\packages\\microsoft.aspnetcore.app.internal.assets\\10.0.9\\microsoft.aspnetcore.app.internal.assets.10.0.9.nupkg.sha512"
+  ],
   "logs": []
 }
