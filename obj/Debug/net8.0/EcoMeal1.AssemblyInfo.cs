@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EcoMeal1")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+73034431b7c84d0528cde178fb28912505e5cd8d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d0d8c74c97e072c415ce4cdb9301dcff719611d3")]
 [assembly: System.Reflection.AssemblyProductAttribute("EcoMeal1")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EcoMeal1")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
