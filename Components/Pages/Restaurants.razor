@@ -1,0 +1,65 @@
+﻿@page "/restaurants"
+@attribute [StreamRendering]
+
+<PageTitle>Restaurants</PageTitle>
+
+<h1>Restaurants</h1>
+
+@if (restaurants == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Name</th>
+                <th>Adress</th>
+                <th>Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var forecast in restaurants)
+            {
+                <tr>
+                    <td>@forecast.Date.ToShortDateString()</td>
+                    <td>@forecast.Name</td>
+                    <td>@forecast.Date</td>
+                    <td>@forecast.Type</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@code {
+    private RestaurantsArray[]? restaurants;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(500);
+
+        var startDate = DateOnly.FromDateTime(DateTime.Now);
+        var adresses = new[] { "123 Main St", "456 Elm St", "789 Oak St", "101 Maple Ave", "202 Pine Rd" };
+        var names = new[] { "The Cozy Corner", "Bistro Bliss", "Pizza Palace", "Dinner Delight", "Breakfast Bonanza" };
+        var types = new[] { "Small", "Bistro", "Pizza", "Dinner", "Breakfast"};
+        restaurants = Enumerable.Range(1, 5).Select(index => new RestaurantsArray
+            {
+                Date = startDate.AddDays(index),
+                Name = names [Random.Shared.Next(names.Length)],
+                Adress = adresses[Random.Shared.Next(adresses.Length)],
+                Type = types[Random.Shared.Next(types.Length)]
+            }).ToArray();
+    }
+
+    private class RestaurantsArray
+    {
+        public DateOnly Date { get; set; }
+        public string Name  { get; set; }
+        public string? Adress { get; set; }
+        public string Type { get; set; }
+    }
+}

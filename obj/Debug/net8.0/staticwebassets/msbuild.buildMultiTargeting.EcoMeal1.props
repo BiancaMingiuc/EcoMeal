@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\EcoMeal1.props" />
+</Project>
