@@ -1,10 +1,22 @@
 using EcoMeal1.Components;
+using EcoMeal1.Database_CodeFirst;
+using EcoMeal1.Entities_CodeFirst;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<EcoMealDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
+builder.Services.AddIdentity<EcoMealUser, IdentityRole>()
+    .AddEntityFrameworkStores<EcoMealDbContext>()
+    .AddDefaultTokenProviders();
 
 var app = builder.Build();
 
