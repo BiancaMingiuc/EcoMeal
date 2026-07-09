@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -15,6 +15,12 @@
     <EmbeddedResource Remove="Entities_DbFirst\**" />
     <None Remove="Database_DbFirst\**" />
     <None Remove="Entities_DbFirst\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="Components\Pages\Component.razor" />
+    <Content Remove="Components\Pages\Component1.razor" />
+    <Content Remove="Components\Pages\Restaurants.razor" />
   </ItemGroup>
 
   <ItemGroup>

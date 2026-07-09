@@ -1,0 +1,83 @@
+@page "/packages"
+@rendermode InteractiveServer
+@using EcoMeal1.Entities_CodeFirst
+@using EcoMeal1.Controllers
+@inject PackageController PackageController
+
+<PageTitle>Packages</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Packages</h1>
+    <a href="/packages/create" class="btn btn-primary">+ Add Package</a>
+</div>
+
+@if (packages == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!packages.Any())
+{
+    <p>No packages found.</p>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var pkg in packages)
+        {
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm">
+                    <img src="@pkg.ImageURL" class="card-img-top" alt="@pkg.Name" style="height:200px; object-fit:cover;" />
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title mb-0">@pkg.Name</h5>
+                            <span class="badge bg-success rounded-pill">@pkg.Price.ToString("0.00") RON</span>
+                        </div>
+                        
+                        @if (pkg.Businesses != null)
+                        {
+                            <p class="text-muted small mb-2">
+                                <i class="bi bi-shop"></i> @pkg.Businesses.Name
+                            </p>
+                        }
+
+                        <p class="card-text">@pkg.Description</p>
+                        
+                        <div class="mt-auto">
+                            <hr class="my-2"/>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="bi bi-box-seam"></i> @pkg.Quantity available
+                                </small>
+                                <small class="text-muted">
+                                    <i class="bi bi-clock"></i> @pkg.PickupStart.ToString("HH:mm") - @pkg.PickupEnd.ToString("HH:mm")
+                                </small>
+                            </div>
+                        </div>
+                        <div class="mt-3 d-flex justify-content-between">
+                            <a href="/packages/create/@pkg.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <button class="btn btn-sm btn-outline-danger" @onclick="() => DeletePackage(pkg.Id)">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<Package>? packages;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await PackageController.GetAll();
+        packages = result.Value;
+    }
+
+    private async Task DeletePackage(Guid id)
+    {
+        await PackageController.DeleteAsync(id);
+        var result = await PackageController.GetAll();
+        packages = result.Value;
+    }
+
+}

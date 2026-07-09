@@ -1,0 +1,206 @@
+@page "/packages/create"
+@page "/packages/create/{Id:guid}"
+@rendermode InteractiveServer
+@using EcoMeal1.Enums
+@using EcoMeal1.Entities_CodeFirst
+@using EcoMeal1.Controllers
+@inject PackageController PackageController
+@inject BusinessesController BusinessesControler
+@inject NavigationManager NavigationManager
+
+<h3 class="card-title mb-0">@(Id.HasValue ? "Edit Package" : "Create New Package")</h3>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">Create New Package</h3>
+                </div>
+                <div class="card-body">
+                    
+                    @if (errorMessage != null)
+                    {
+                        <div class="alert alert-danger">@errorMessage</div>
+                    }
+
+                    <EditForm Model="@model" FormName="CreatePackageForm" OnValidSubmit="Submit">
+                        <DataAnnotationsValidator />
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="name" class="form-label">Name</label>
+                                <InputText id="name" class="form-control" @bind-Value="model.Name" />
+                            </div>
+                            <div class="col-md-6">
+                                <label for="businessId" class="form-label">Business</label>
+                                <InputSelect id="businessId" class="form-select" @bind-Value="model.BusinessId">
+                                    <option value="">-- Select a Business --</option>
+                                    @if (businesses != null)
+                                    {
+                                        @foreach (var b in businesses)
+                                        {
+                                            <option value="@b.Id">@b.Name</option>
+                                        }
+                                    }
+                                </InputSelect>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <InputTextArea id="description" class="form-control" @bind-Value="model.Description" rows="3" />
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="price" class="form-label">Price</label>
+                                <InputNumber id="price" class="form-control" @bind-Value="model.Price" />
+                            </div>
+                            <div class="col-md-4">
+                                <label for="quantity" class="form-label">Quantity</label>
+                                <InputNumber id="quantity" class="form-control" @bind-Value="model.Quantity" />
+                            </div>
+                            <div class="col-md-4">
+                                <label for="packageType" class="form-label">Package Type</label>
+                                <InputSelect id="packageType" class="form-select" @bind-Value="model.PackageTypeId">
+                                    <option value="0">-- Select Type --</option>
+                                    @foreach (var type in Enum.GetValues<PackageTypeEnum>())
+                                    {
+                                        <option value="@((int)type)">@type.ToString()</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="pickupStart" class="form-label">Pickup Start Time</label>
+                                <InputDate Type="InputDateType.Time" id="pickupStart" class="form-control" @bind-Value="model.PickupStart" />
+                            </div>
+                            <div class="col-md-6">
+                                <label for="pickupEnd" class="form-label">Pickup End Time</label>
+                                <InputDate Type="InputDateType.Time" id="pickupEnd" class="form-control" @bind-Value="model.PickupEnd" />
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="imageURL" class="form-label">Image URL</label>
+                            <InputText id="imageURL" class="form-control" @bind-Value="model.ImageURL" />
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="/packages" class="btn btn-outline-secondary me-md-2">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <h3 class="card-title mb-0">@(Id.HasValue ? "Edit Package" : "Create New Package")</h3>
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Guid? Id { get; set; }
+
+    private PackageFormModel model = new PackageFormModel() 
+    { 
+        PickupStart = new DateTime(1, 1, 1, 8, 0, 0), 
+        PickupEnd = new DateTime(1, 1, 1, 17, 0, 0)
+    };
+    
+    private List<Businesses>? businesses;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await BusinessesControler.GetAll();
+        businesses = result.Value;
+
+        if (Id.HasValue)
+        {
+            var existing = (await PackageController.GetById(Id.Value)).Value;
+            if (existing != null)
+            {
+                model.Name = existing.Name;
+                model.Description = existing.Description;
+                model.Price = existing.Price;
+                model.Quantity = existing.Quantity;
+                model.PickupStart = existing.PickupStart;
+                model.PickupEnd = existing.PickupEnd;
+                model.ImageURL = existing.ImageURL;
+                model.BusinessId = existing.BusinessId;
+                model.PackageTypeId = existing.PackageTypeId;
+            }
+        }
+    }
+
+    private async Task Submit()
+    {
+        try
+        {
+            if (model.BusinessId == Guid.Empty)
+            {
+                errorMessage = "Please select a Business.";
+                return;
+            }
+
+            if (model.PackageTypeId == 0)
+            {
+                errorMessage = "Please select a Package Type.";
+                return;
+            }
+
+            var today = DateTime.Today;
+            
+            var package = new Package
+            {
+                Id = Guid.NewGuid(),
+                BusinessId = model.BusinessId,
+                PackageTypeId = model.PackageTypeId,
+                Name = model.Name ?? string.Empty,
+                Description = model.Description ?? string.Empty,
+                Price = model.Price,
+                Quantity = model.Quantity,
+                PickupStart = new DateTime(today.Year, today.Month, today.Day, model.PickupStart.Hour, model.PickupStart.Minute, 0),
+                PickupEnd = new DateTime(today.Year, today.Month, today.Day, model.PickupEnd.Hour, model.PickupEnd.Minute, 0),
+                ImageURL = model.ImageURL ?? string.Empty
+            };
+
+            if (Id.HasValue)
+            {
+                await PackageController.UpdateAsync(Id.Value, package);
+            }
+            else
+            {
+                await PackageController.AddAsync(package);
+            }
+
+            NavigationManager.NavigateTo("/packages");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error creating package: {ex.Message}";
+            if (ex.InnerException != null)
+            {
+                errorMessage += $" -> {ex.InnerException.Message}";
+            }
+        }
+    }
+
+    private class PackageFormModel
+    {
+        public Guid BusinessId { get; set; }
+        public int PackageTypeId { get; set; }
+        public string? Name { get; set; }
+        public string? Description { get; set; }
+        public float Price { get; set; }
+        public int Quantity { get; set; }
+        public DateTime PickupStart { get; set; }
+        public DateTime PickupEnd { get; set; }
+        public string? ImageURL { get; set; }
+    }
+}

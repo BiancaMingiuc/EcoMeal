@@ -12,6 +12,7 @@ namespace EcoMeal1.Database_CodeFirst
         {
 
         }
+
         public DbSet<Order> Orders { get; set; }
         public DbSet<Status> Statuses { get; set; }
         public DbSet<Businesses> Businesses { get; set; }
@@ -30,21 +31,11 @@ namespace EcoMeal1.Database_CodeFirst
                 .HasForeignKey(op => op.OrderId)
                 .OnDelete(DeleteBehavior.Restrict);  
 
-            builder.Entity<OrderPackage>()
-                .HasOne(op => op.Package)
-                .WithMany(p => p.OrderPackages)
-                .HasForeignKey(op => op.PackageId)
-                .OnDelete(DeleteBehavior.Restrict);  
-
             builder.Entity<Order>()
-                .HasOne(o => o.Business)
-                .WithMany(b => b.Orders)
-                .HasForeignKey(o => o.BusinessId)
-                .OnDelete(DeleteBehavior.Restrict); 
-
-            builder.Entity<Order>()
-                .Property(o => o.Status)
-                .HasConversion<int>();
+                .HasOne(o => o.Status)
+                .WithMany()
+                .HasForeignKey(o => o.StatusId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<Status>().HasData(
                 new Status { Id = 1, Name = "Pending" },
@@ -53,8 +44,10 @@ namespace EcoMeal1.Database_CodeFirst
             );
 
             builder.Entity<Businesses>()
-                .Property(b => b.BusinessTypeId)
-                .HasConversion<int>();
+                .HasOne(b => b.BusinessType)
+                .WithMany()
+                .HasForeignKey(b => b.BusinessTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<BusinessesType>().HasData(
                 new BusinessesType { Id = 1, Name = "Restaurant" },
@@ -65,8 +58,10 @@ namespace EcoMeal1.Database_CodeFirst
                 );
 
             builder.Entity<Package>()
-                .Property(p => p.PackageTypeId)
-                .HasConversion<int>();
+                .HasOne(b => b.PackageType)
+                .WithMany()
+                .HasForeignKey(b => b.PackageTypeId)
+                .OnDelete(DeleteBehavior.Restrict);    
 
             builder.Entity<PackageType>().HasData(
                 new PackageType { Id = 1, Name = "Surprise Bag" },

@@ -4,6 +4,7 @@ using EcoMeal1.Database_CodeFirst;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EcoMeal1.Migrations
 {
     [DbContext(typeof(EcoMealDbContext))]
-    partial class EcoMealDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260706115801_BusinessType")]
+    partial class BusinessType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -180,7 +183,7 @@ namespace EcoMeal1.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("StatusId")
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
@@ -190,8 +193,6 @@ namespace EcoMeal1.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BusinessId");
-
-                    b.HasIndex("StatusId");
 
                     b.HasIndex("UserId");
 
@@ -261,8 +262,6 @@ namespace EcoMeal1.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BusinessId");
-
-                    b.HasIndex("PackageTypeId");
 
                     b.ToTable("Packages");
                 });
@@ -503,7 +502,7 @@ namespace EcoMeal1.Migrations
                     b.HasOne("EcoMeal1.Entities_CodeFirst.BusinessesType", "BusinessType")
                         .WithMany()
                         .HasForeignKey("BusinessTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("BusinessType");
@@ -514,12 +513,6 @@ namespace EcoMeal1.Migrations
                     b.HasOne("EcoMeal1.Entities_CodeFirst.Businesses", "Business")
                         .WithMany("Orders")
                         .HasForeignKey("BusinessId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EcoMeal1.Entities_CodeFirst.Status", "Status")
-                        .WithMany()
-                        .HasForeignKey("StatusId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -530,8 +523,6 @@ namespace EcoMeal1.Migrations
                         .IsRequired();
 
                     b.Navigation("Business");
-
-                    b.Navigation("Status");
 
                     b.Navigation("User");
                 });
@@ -547,7 +538,7 @@ namespace EcoMeal1.Migrations
                     b.HasOne("EcoMeal1.Entities_CodeFirst.Package", "Package")
                         .WithMany("OrderPackages")
                         .HasForeignKey("PackageId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Order");
@@ -563,15 +554,7 @@ namespace EcoMeal1.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("EcoMeal1.Entities_CodeFirst.PackageType", "PackageType")
-                        .WithMany()
-                        .HasForeignKey("PackageTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("Businesses");
-
-                    b.Navigation("PackageType");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

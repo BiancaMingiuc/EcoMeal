@@ -1,0 +1,139 @@
+@page "/businesses/create"
+@page "/businesses/create/{Id:guid}"
+@rendermode InteractiveServer
+@using EcoMeal1.Enums
+@using EcoMeal1.Entities_CodeFirst
+@using EcoMeal1.Controllers
+@inject BusinessesController BusinessesControler
+@inject NavigationManager NavigationManager
+
+<h3 class="card-title mb-0">@(Id.HasValue ? "Edit Business" : "Create New Business")</h3>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">Create New Business</h3>
+                </div>
+                <div class="card-body">
+                    
+                    @if (errorMessage != null)
+                    {
+                        <div class="alert alert-danger">@errorMessage</div>
+                    }
+
+                    <EditForm Model="@model" FormName="CreateBusinessForm" OnValidSubmit="Submit">
+                        <DataAnnotationsValidator />
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="name" class="form-label">Name</label>
+                                <InputText id="name" class="form-control" @bind-Value="model.Name"/>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="BusinessType" class="form-label">Business Type</label>
+                                <InputSelect id="businessType" class="form-select" @bind-Value="model.BusinessTypeId">
+                                    <option value="0">-- Select Type --</option>
+                                    @foreach (var type in Enum.GetValues<BusinessesTypeEnum>())
+                                    {
+                                        <option value="@type">@type</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <InputTextArea id="description" class="form-control" @bind-Value="model.Description" rows="3" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Address</label>
+                            <InputText id="address" class="form-control" @bind-Value="model.Address" />
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="imageURL" class="form-label">Image URL</label>
+                            <InputText id="imageURL" class="form-control" @bind-Value="model.ImageURL" />
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="/businesses" class="btn btn-outline-secondary me-md-2">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4">@(Id.HasValue? "Edit Business" : "Create business")</button>
+                        </div>
+
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Guid? Id { get; set; }
+
+    private BusinessFormModel model = new BusinessFormModel();
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id.HasValue)
+        {
+            var existing = (await BusinessesControler.GetById(Id.Value)).Value;
+            if (existing != null)
+            {
+                model.Name = existing.Name;
+                model.Description = existing.Description;
+                model.Address = existing.Address;
+                model.ImageURL = existing.ImageURL;
+                model.BusinessTypeId = (BusinessesTypeEnum)existing.BusinessTypeId;
+            }
+        }
+    }
+
+    private async Task Submit(){
+        try
+        {
+            if (model.BusinessTypeId == 0)
+            {
+                errorMessage = "Please select a Business Type.";
+                return;
+            }
+
+            var business = new Businesses
+            {
+                Id = Id?? Guid.NewGuid(),
+                Name = model.Name ?? string.Empty,
+                Description = model.Description ?? string.Empty,
+                Address = model.Address ?? string.Empty,
+                ImageURL = model.ImageURL ?? string.Empty,
+                BusinessTypeId = (int)model.BusinessTypeId
+            };
+            
+            if (Id.HasValue)
+            {
+                await BusinessesControler.UpdateAsync(Id.Value, business);
+            }
+            else
+            {
+                await BusinessesControler.AddAsync(business);
+            }
+            NavigationManager.NavigateTo("/businesses");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error creating business: {ex.Message}";
+        }
+    }
+
+    private class BusinessFormModel
+    {
+        public string? Name { get; set; } 
+        public string? Description { get; set; } 
+        public string? Address { get; set; }
+        public string? ImageURL { get; set; } 
+        public BusinessesTypeEnum BusinessTypeId { get; set; }
+    }
+}

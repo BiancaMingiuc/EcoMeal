@@ -11,7 +11,8 @@ namespace EcoMeal1.Entities_CodeFirst
         public required string Description { get; set; }
         public required string Address { get; set; }
         public required string ImageURL { get; set; }
-        public required BusinessesTypeEnum BusinessTypeId { get; set; }
+        public required int BusinessTypeId { get; set; }
+        public BusinessesType BusinessType { get; set; }
         public ICollection<Order> Orders { get; set; } = new List<Order>();
         public ICollection<Package> Packages { get; set; } = new List<Package>();
     }

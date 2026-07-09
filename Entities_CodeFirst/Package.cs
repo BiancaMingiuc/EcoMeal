@@ -9,7 +9,8 @@ namespace EcoMeal1.Entities_CodeFirst
         public Guid BusinessId { get; set; }
         [ForeignKey("BusinessId")]
         public virtual Businesses Businesses { get; set; }
-        public PackageTypeEnum PackageTypeId { get; set; }
+        public required int PackageTypeId { get; set; }
+        public PackageType PackageType { get; set; }
         public required string Name { get; set; }
         public required string Description { get; set; }
         public float Price { get; set; }

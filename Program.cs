@@ -1,6 +1,11 @@
 using EcoMeal1.Components;
+using EcoMeal1.Controllers;
 using EcoMeal1.Database_CodeFirst;
 using EcoMeal1.Entities_CodeFirst;
+using EcoMeal1.Repositories;
+using EcoMeal1.Repositories.Interfaces;
+using EcoMeal1.Services;
+using EcoMeal1.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,6 +22,16 @@ builder.Services.AddDbContext<EcoMealDbContext>(options =>
 builder.Services.AddIdentity<EcoMealUser, IdentityRole>()
     .AddEntityFrameworkStores<EcoMealDbContext>()
     .AddDefaultTokenProviders();
+
+builder.Services.AddScoped<IBusinessesRepository, BusinessesRepository>();
+builder.Services.AddScoped<IPackageRepository, PackageRepository>();
+//builder.Services.AddSingleton<IBusinessesRepository, BusinessesRepository>
+builder.Services.AddScoped<IBusinessesService, BusinessesService>();
+builder.Services.AddScoped<IPackageService, PackageService>();
+
+builder.Services.AddControllers();
+builder.Services.AddScoped<BusinessesController>();
+builder.Services.AddScoped<PackageController>();
 
 var app = builder.Build();
 
