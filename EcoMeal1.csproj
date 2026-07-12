@@ -4,6 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>cbec321f-7839-47ba-ba98-376123a23247</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +16,10 @@
     <EmbeddedResource Remove="Entities_DbFirst\**" />
     <None Remove="Database_DbFirst\**" />
     <None Remove="Entities_DbFirst\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Controllers\RegisterController.cs" />
   </ItemGroup>
 
   <ItemGroup>

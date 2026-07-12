@@ -11,17 +11,33 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+    .AddInteractiveServerComponents(options => options.DetailedErrors = true);
+builder.Services.AddCascadingAuthenticationState();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<EcoMealDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-builder.Services.AddIdentity<EcoMealUser, IdentityRole>()
-    .AddEntityFrameworkStores<EcoMealDbContext>()
-    .AddDefaultTokenProviders();
+builder.Services.AddIdentity<EcoMealUser, IdentityRole>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = true;
+    options.Password.RequiredLength = 8;
+}).AddEntityFrameworkStores<EcoMealDbContext>()
+  .AddDefaultTokenProviders();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/account/login";
+    options.AccessDeniedPath = "/account/access-denied";
+
+    options.SlidingExpiration = true;
+});
+
+builder.Services.Configure<SecurityStampValidatorOptions>(options=>
+{
+    options.ValidationInterval = TimeSpan.FromMinutes(30);
+});
 
 builder.Services.AddScoped<IBusinessesRepository, BusinessesRepository>();
 builder.Services.AddScoped<IPackageRepository, PackageRepository>();
@@ -29,11 +45,17 @@ builder.Services.AddScoped<IPackageRepository, PackageRepository>();
 builder.Services.AddScoped<IBusinessesService, BusinessesService>();
 builder.Services.AddScoped<IPackageService, PackageService>();
 
+builder.Services.AddScoped<IAuthService, AuthService>();
+
 builder.Services.AddControllers();
 builder.Services.AddScoped<BusinessesController>();
 builder.Services.AddScoped<PackageController>();
 
 var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+    await DbSeeder.SeedAsync(scope.ServiceProvider, app.Configuration);
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -44,9 +66,14 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseStaticFiles();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.UseAntiforgery();
+
+app.MapControllers();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

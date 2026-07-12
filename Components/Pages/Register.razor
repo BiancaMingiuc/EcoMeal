@@ -1,0 +1,160 @@
+@page "/account/register"
+@layout Layout.AuthLayout
+@rendermode InteractiveServer
+
+<PageTitle>Register — EcoMeal</PageTitle>
+
+<div class="auth-wrap">
+    <div class="auth-box">
+        <div class="auth-head">
+            <a href="/" class="auth-brand">EcoMeal</a>
+            <h1>Create an account</h1>
+            <p>Fill in the details below to register.</p>
+        </div>
+
+        @if (Error is not null)
+        {
+            <div class="auth-err">@Error</div>
+        }
+
+        <form method="post" action="api/auth/register">
+            <div class="field">
+                <label for="reg-name">Full Name</label>
+                <input id="reg-name" class="form-control" type="text" name="fullName" placeholder="John Doe" required />
+            </div>
+            <div class="field">
+                <label for="reg-email">Email</label>
+                <input id="reg-email" class="form-control" type="email" name="email" placeholder="address@email.com" required />
+            </div>
+            <div class="field-row">
+                <div class="field">
+                    <label for="reg-pass">Password</label>
+                    <input id="reg-pass" class="form-control" type="password" name="password" placeholder="Min. 8 characters" required />
+                </div>
+                <div class="field">
+                    <label for="reg-confirm">Confirm Password</label>
+                    <input id="reg-confirm" class="form-control" type="password" name="confirmPassword" placeholder="Repeat password" required />
+                </div>
+            </div>
+            <input type="hidden" name="role" value="Customer" />
+            <button type="submit" class="auth-btn">Create account</button>
+        </form>
+
+        <p class="auth-switch">
+            Already have an account? <a href="/account/login">Login</a>
+        </p>
+    </div>
+</div>
+
+<style>
+    .auth-wrap {
+        min-height: 100vh;
+        width: 100vw;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+        background: #f9fafb;
+    }
+
+    .auth-box {
+        width: 100%;
+        max-width: 460px;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 2.25rem;
+    }
+
+    .auth-head { margin-bottom: 1.75rem; }
+
+    .auth-brand {
+        display: inline-block;
+        font-family: 'Sora', sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #16a34a;
+        text-decoration: none;
+        margin-bottom: 1.25rem;
+    }
+
+    .auth-head h1 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 0.35rem;
+    }
+
+    .auth-head p {
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin: 0;
+    }
+
+    .auth-err {
+        background: #fef2f2;
+        border-left: 3px solid #dc2626;
+        color: #991b1b;
+        font-size: 0.85rem;
+        padding: 0.7rem 0.9rem;
+        border-radius: 6px;
+        margin-bottom: 1.25rem;
+    }
+
+    .field { margin-bottom: 1rem; }
+
+    .field-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+    }
+
+    .field label {
+        display: block;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.35rem;
+    }
+
+    .field .form-control { width: 100%; }
+
+    .auth-btn {
+        display: block;
+        width: 100%;
+        padding: 0.72rem;
+        background: #16a34a;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 1.25rem;
+        transition: background 0.15s;
+    }
+    .auth-btn:hover { background: #15803d; }
+
+    .auth-switch {
+        text-align: center;
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-top: 1.25rem;
+        margin-bottom: 0;
+    }
+
+    .auth-switch a {
+        color: #16a34a;
+        font-weight: 600;
+    }
+
+    @@media (max-width: 480px) {
+        .field-row { grid-template-columns: 1fr; }
+    }
+</style>
+
+@code {
+    [SupplyParameterFromQuery]
+    private string? Error { get; set; }
+}

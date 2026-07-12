@@ -1,6 +1,8 @@
+@using Microsoft.AspNetCore.Components.Authorization
+
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">EcoMeal1</a>
+        <a class="navbar-brand" href="">EcoMeal</a>
     </div>
 </div>
 
@@ -8,15 +10,12 @@
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="flex-column">
+
+        <div class="nav-section-label">Navigation</div>
+
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="businesses">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Businesses
             </NavLink>
         </div>
 
@@ -26,11 +25,28 @@
             </NavLink>
         </div>
 
-        @* <div class="nav-item px-3">
-            <NavLink class="nav-link" href="restaurants">
-                <span class="bi bi-fork-knife-nav-menu" aria-hidden="true"></span> Restaurants
-            </NavLink>
-        </div> *@
+        <AuthorizeView Roles="Admin,BusinessManager">
+            <Authorized>
+                <div class="nav-divider"></div>
+                <div class="nav-section-label">Management</div>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="businesses">
+                        <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Businesses
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+
+        <AuthorizeView Roles="Admin">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="admin/users">
+                        <span class="bi bi-people-fill" aria-hidden="true"></span> Users
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+
     </nav>
 </div>
-

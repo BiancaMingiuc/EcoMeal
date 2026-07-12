@@ -2,7 +2,10 @@
 @rendermode InteractiveServer
 @using EcoMeal1.Controllers
 @using EcoMeal1.Entities_CodeFirst
+@using EcoMeal1.Constants
+@using Microsoft.AspNetCore.Authorization
 @inject BusinessesController BusinessesControler
+@attribute [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.BusinessManager}")]
 
 <PageTitle>Businesses</PageTitle>
 

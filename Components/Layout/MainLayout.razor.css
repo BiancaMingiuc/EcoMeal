@@ -1,73 +1,70 @@
+/* ---- Sidebar Layout ---- */
 .page {
     position: relative;
     display: flex;
     flex-direction: column;
 }
 
-main {
-    flex: 1;
-}
+main { flex: 1; }
 
 .sidebar {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    background: linear-gradient(170deg, #0d2b1a 0%, #1a4731 50%, #0d3322 100%);
 }
 
+/* ---- Top Bar ---- */
 .top-row {
-    background-color: #f7f7f7;
-    border-bottom: 1px solid #d6d5d5;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0f5ea;
     justify-content: flex-end;
     height: 3.5rem;
     display: flex;
     align-items: center;
+    padding: 0 1.5rem;
+    box-shadow: 0 1px 6px rgba(46,204,113,0.08);
 }
 
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        white-space: nowrap;
-        margin-left: 1.5rem;
-        text-decoration: none;
-    }
+.top-row ::deep a,
+.top-row ::deep .btn-link {
+    white-space: nowrap;
+    margin-left: 1rem;
+    text-decoration: none;
+    font-size: 0.875rem;
+}
 
-    .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
-        text-decoration: underline;
-    }
+.top-row ::deep a:hover,
+.top-row ::deep .btn-link:hover {
+    text-decoration: underline;
+}
 
-    .top-row ::deep a:first-child {
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
+/* Username display in top bar */
+.top-row .user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+}
 
 @media (max-width: 640.98px) {
-    .top-row {
-        justify-content: space-between;
-    }
-
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        margin-left: 0;
-    }
+    .top-row { justify-content: space-between; }
+    .top-row ::deep a,
+    .top-row ::deep .btn-link { margin-left: 0; }
 }
 
 @media (min-width: 641px) {
-    .page {
-        flex-direction: row;
-    }
+    .page { flex-direction: row; }
 
     .sidebar {
-        width: 250px;
+        width: 260px;
         height: 100vh;
         position: sticky;
         top: 0;
+        box-shadow: 4px 0 20px rgba(0,0,0,0.25);
     }
 
     .top-row {
         position: sticky;
         top: 0;
-        z-index: 1;
-    }
-
-    .top-row.auth ::deep a:first-child {
-        flex: 1;
-        text-align: right;
-        width: 0;
+        z-index: 10;
     }
 
     .top-row, article {
@@ -76,6 +73,7 @@ main {
     }
 }
 
+/* ---- Error UI ---- */
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;
@@ -87,10 +85,61 @@ main {
     width: 100%;
     z-index: 1000;
 }
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+}
 
-    #blazor-error-ui .dismiss {
-        cursor: pointer;
-        position: absolute;
-        right: 0.75rem;
-        top: 0.5rem;
-    }
+/* ---- User / Logout in Top Bar ---- */
+.topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-right: 1rem;
+}
+
+.topbar-avatar {
+    width: 30px;
+    height: 30px;
+    background: #16a34a;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78rem;
+    font-weight: 700;
+    font-family: 'Sora', sans-serif;
+    flex-shrink: 0;
+}
+
+.topbar-name {
+    font-size: 0.85rem;
+    color: #374151;
+    font-weight: 500;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.topbar-logout {
+    background: none;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    color: #6b7280;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.3rem 0.7rem;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+    font-family: 'Inter', sans-serif;
+}
+
+.topbar-logout:hover {
+    border-color: #fca5a5;
+    color: #dc2626;
+    background: #fef2f2;
+}

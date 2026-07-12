@@ -1,0 +1,104 @@
+@page "/admin/users"
+@rendermode InteractiveServer
+@using EcoMeal1.Entities_CodeFirst
+@using EcoMeal1.Constants
+@using EcoMeal1.Services.Interfaces
+@using Microsoft.AspNetCore.Authorization
+@inject IAuthService AuthService
+@attribute [Authorize(Roles = AppRoles.Admin)]
+
+<PageTitle>User Management</PageTitle>
+
+<h3>User Management</h3>
+
+@if (users is null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!users.Any())
+{
+    <p>No users found.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Current Role</th>
+                <th>Change Role</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var (user, roles) in users)
+            {
+                var currentRole = roles.FirstOrDefault() ?? "None";
+
+                <tr>
+                    <td>@user.FullName</td>
+                    <td>@user.Email</td>
+                    <td>
+                        <span class="badge @(currentRole == AppRoles.Admin ? "bg-danger" :
+                                                                           currentRole == AppRoles.BusinessManager ? "bg-warning text-dark" :
+                                                                           "bg-secondary")">
+                            @currentRole
+                        </span>
+                    </td>
+                    <td>
+                        @if (currentRole != AppRoles.Admin)
+                        {
+                            @if (currentRole == AppRoles.Customer)
+                            {
+                                <button class="btn btn-sm btn-outline-warning"
+                                        @onclick="() => ChangeRole(user.Id, AppRoles.BusinessManager)">
+                                    → BusinessManager
+                                </button>
+                            }
+                            else if (currentRole == AppRoles.BusinessManager)
+                            {
+                                <button class="btn btn-sm btn-outline-secondary"
+                                        @onclick="() => ChangeRole(user.Id, AppRoles.Customer)">
+                                    → Customer
+                                </button>
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-muted small">Admin — cannot be modified</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (message is not null)
+{
+    <div class="alert alert-info mt-3">@message</div>
+}
+
+@code {
+    private List<(EcoMealUser User, IList<string> Roles)>? users;
+    private string? message;
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await AuthService.GetAllUsersWithRolesAsync();
+    }
+
+    private async Task ChangeRole(string userId, string newRole)
+    {
+        var result = await AuthService.ChangeUserRoleAsync(userId, newRole);
+        if (result.Succeeded)
+        {
+            message = $"Role successfully changed to {newRole}.";
+            users = await AuthService.GetAllUsersWithRolesAsync(); 
+        }
+        else
+        {
+            message = result.Errors.FirstOrDefault()?.Description ?? "Error changing role.";
+        }
+    }
+}
