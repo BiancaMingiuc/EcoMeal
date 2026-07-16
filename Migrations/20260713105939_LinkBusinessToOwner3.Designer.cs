@@ -4,6 +4,7 @@ using EcoMeal1.Database_CodeFirst;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EcoMeal1.Migrations
 {
     [DbContext(typeof(EcoMealDbContext))]
-    partial class EcoMealDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260713105939_LinkBusinessToOwner3")]
+    partial class LinkBusinessToOwner3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -361,17 +364,12 @@ namespace EcoMeal1.Migrations
                         new
                         {
                             Id = 2,
-                            Name = "Confirmed"
+                            Name = "Shipped"
                         },
                         new
                         {
                             Id = 3,
-                            Name = "PickedUp"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "Cancelled"
+                            Name = "Delivered"
                         });
                 });
 

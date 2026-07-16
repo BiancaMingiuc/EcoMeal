@@ -1,0 +1,251 @@
+@page "/business/{Id:guid}"
+@rendermode InteractiveServer
+@using EcoMeal1.Entities_CodeFirst
+@using EcoMeal1.Services.Interfaces
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@inject IBusinessesService BusinessesService
+@inject IPackageService PackageService
+@inject IOrderService OrderService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
+
+<PageTitle>Business Details</PageTitle>
+
+@if (business == null)
+{
+    <p><em>Loading business details...</em></p>
+}
+else
+{
+    <div class="business-header shadow-sm mb-4">
+        <div class="business-cover" style="background-image: url('@business.ImageURL');">
+            <div class="business-overlay"></div>
+        </div>
+        <div class="business-info-container">
+            <h1 class="business-title">@business.Name</h1>
+            @if (business.BusinessType != null)
+            {
+                <span class="badge bg-light text-dark border mb-2">@business.BusinessType.Name</span>
+            }
+            <p class="business-address"><i class="bi bi-geo-alt-fill text-danger"></i> @business.Address</p>
+            <p class="business-description">@business.Description</p>
+        </div>
+    </div>
+
+    <h3 class="mb-3">Available Packages</h3>
+    
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @errorMessage
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <div class="alert alert-success" role="alert">
+            @successMessage
+        </div>
+    }
+
+    @if (packages == null || !packages.Any(p => p.Quantity > 0))
+    {
+        <div class="alert alert-info">
+            <p class="mb-0">No available packages for this business at the moment.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-3">
+            @foreach (var pkg in packages.Where(p => p.Quantity > 0))
+            {
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <img src="@pkg.ImageURL" class="card-img-top" alt="@pkg.Name" style="height:200px; object-fit:cover;" />
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h5 class="card-title fw-bold mb-0">@pkg.Name</h5>
+                                    @if (pkg.PackageType != null)
+                                    {
+                                        <span class="badge bg-secondary mt-1">@pkg.PackageType.Name</span>
+                                    }
+                                </div>
+                                <span class="badge bg-success rounded-pill fs-6">@pkg.Price.ToString("0.00") RON</span>
+                            </div>
+
+                            <p class="card-text small mb-3 flex-grow-1">@pkg.Description</p>
+                            
+                            <hr class="my-2"/>
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-muted small fw-semibold">
+                                    <i class="bi bi-box-seam"></i> @pkg.Quantity available
+                                </span>
+                                <span class="text-muted small">
+                                    <i class="bi bi-clock"></i> @pkg.PickupStart.ToString("HH:mm") - @pkg.PickupEnd.ToString("HH:mm")
+                                </span>
+                            </div>
+
+                            <div class="mt-auto">
+                                <label class="form-label small">Quantity</label>
+                                <input type="number" @bind="selectedQuantities[pkg.Id]" min="1" max="@pkg.Quantity" class="form-control mb-2" />
+                                <button class="btn btn-primary w-100 fw-bold" @onclick="() => PlaceDirectOrder(pkg)">
+                                    Order Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+}
+
+<style>
+    .business-header {
+        position: relative;
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .business-cover {
+        height: 250px;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+    }
+    .business-overlay {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 100%);
+    }
+    .business-info-container {
+        padding: 2rem;
+        position: relative;
+        margin-top: -60px;
+        background: white;
+        border-radius: 12px 12px 0 0;
+        z-index: 10;
+        box-shadow: 0 -10px 20px rgba(0,0,0,0.05);
+    }
+    .business-title {
+        font-family: 'Sora', sans-serif;
+        font-weight: 800;
+        font-size: 2.2rem;
+        margin-bottom: 0.5rem;
+    }
+    .business-address {
+        color: #6c757d;
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+    }
+    .business-description {
+        font-size: 1.05rem;
+        line-height: 1.6;
+        color: #333;
+    }
+</style>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private Businesses? business;
+    private List<Package>? packages;
+    private Dictionary<Guid, int> selectedQuantities = new();
+    private string? errorMessage;
+    private string? successMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        business = await BusinessesService.GetByIdAsync(Id);
+        
+        if (business == null)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        packages = await PackageService.GetByBusinessIdAsync(Id);
+
+        if (packages != null)
+        {
+            foreach(var p in packages)
+            {
+                selectedQuantities[p.Id] = 1;
+            }
+        }
+    }
+
+    private async Task PlaceDirectOrder(Package package)
+    {
+        errorMessage = null;
+        successMessage = null;
+        
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        
+        if (!user.Identity?.IsAuthenticated ?? true)
+        {
+            errorMessage = "You must be logged in to place an order.";
+            return;
+        }
+
+        var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+        {
+            errorMessage = "Could not find user ID.";
+            return;
+        }
+
+        int quantityToOrder = selectedQuantities.ContainsKey(package.Id) ? selectedQuantities[package.Id] : 1;
+
+        if (quantityToOrder > package.Quantity)
+        {
+            errorMessage = "Not enough quantity available.";
+            return;
+        }
+
+        try
+        {
+            var newOrder = new Order
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                BusinessId = package.BusinessId,
+                OrderNumber = "ORD-" + Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper(),
+                StatusId = 1 // Pending
+            };
+
+            newOrder.OrderPackages.Add(new OrderPackage
+            {
+                Id = Guid.NewGuid(),
+                OrderId = newOrder.Id,
+                PackageId = package.Id,
+                Quantity = quantityToOrder
+            });
+
+            await OrderService.AddAsync(newOrder);
+            
+            successMessage = "Order placed successfully!";
+            
+            // Refresh packages to update quantities
+            packages = await PackageService.GetByBusinessIdAsync(Id);
+            if (packages != null)
+            {
+                foreach(var p in packages)
+                {
+                    selectedQuantities[p.Id] = 1; // Reset quantity
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error placing order: {ex.Message}";
+        }
+    }
+}

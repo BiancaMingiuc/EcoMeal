@@ -1,4 +1,4 @@
-﻿using EcoMeal1.Repositories;
+using EcoMeal1.Repositories;
 using EcoMeal1.Repositories.Interfaces;
 using EcoMeal1.Entities_CodeFirst;
 using EcoMeal1.Database_CodeFirst;
@@ -11,6 +11,11 @@ namespace EcoMeal1.Services
         public async Task<List<Businesses>> GetAllAsync()
         {
             return await businessesRepository.GetAllAsync();
+        }
+
+        public async Task<List<Businesses>> GetAllWithPackagesAsync()
+        {
+            return await businessesRepository.GetAllWithPackagesAsync();
         }
 
         public async Task AddAsync(Businesses business)

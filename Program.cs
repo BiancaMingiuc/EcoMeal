@@ -41,9 +41,11 @@ builder.Services.Configure<SecurityStampValidatorOptions>(options=>
 
 builder.Services.AddScoped<IBusinessesRepository, BusinessesRepository>();
 builder.Services.AddScoped<IPackageRepository, PackageRepository>();
-//builder.Services.AddSingleton<IBusinessesRepository, BusinessesRepository>
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+
 builder.Services.AddScoped<IBusinessesService, BusinessesService>();
 builder.Services.AddScoped<IPackageService, PackageService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 

@@ -1,0 +1,155 @@
+@page "/orders"
+@rendermode InteractiveServer
+@using EcoMeal1.Entities_CodeFirst
+@using EcoMeal1.Services.Interfaces
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@inject IOrderService OrderService
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>Orders</PageTitle>
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Orders</h1>
+        </div>
+    </Authorized>
+</AuthorizeView>
+
+@if (orders == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!orders.Any())
+{
+    <p>No orders found.</p>
+}
+else
+{
+    <div class="accordion" id="ordersAccordion">
+        @foreach (var order in orders)
+        {
+            var accordionId = $"collapse{order.Id:N}";
+            var headingId = $"heading{order.Id:N}";
+
+            <div class="accordion-item mb-3 border rounded shadow-sm">
+                <h2 class="accordion-header" id="@headingId">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@accordionId" aria-expanded="false" aria-controls="@accordionId">
+                        <div class="d-flex w-100 justify-content-between align-items-center me-3">
+                            <strong>Order #@order.OrderNumber @(isAdmin ? $"- {order.User?.Email}" : "")</strong>
+                            <span class="badge @GetBadgeClass(order.StatusId) rounded-pill">@(order.Status?.Name ?? "Pending")</span>
+                        </div>
+                    </button>
+                </h2>
+                <div id="@accordionId" class="accordion-collapse collapse" aria-labelledby="@headingId" data-bs-parent="#ordersAccordion">
+                    <div class="accordion-body">
+                        @if (order.OrderPackages == null || !order.OrderPackages.Any())
+                        {
+                            <p class="text-muted">This order contains no packages.</p>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Package</th>
+                                            <th>Quantity</th>
+                                            <th>Restaurant</th>
+                                            <th>Pickup Time</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var op in order.OrderPackages)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <strong>@(op.Package?.Name ?? "N/A")</strong>
+                                                </td>
+                                                <td>@op.Quantity</td>
+                                                <td>
+                                                    <i class="bi bi-shop text-muted"></i> @(op.Package?.Businesses?.Name ?? "N/A")
+                                                </td>
+                                                <td>
+                                                    @if (op.Package != null)
+                                                    {
+                                                        <span>@op.Package.PickupStart.ToString("dd/MM HH:mm") - @op.Package.PickupEnd.ToString("HH:mm")</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>N/A</span>
+                                                    }
+                                                </td>
+                                                <td class="text-muted small">
+                                                    @(op.Package?.Description ?? "N/A")
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        <div class="mt-3 text-end">
+                            @if (order.StatusId == 1) // Pending
+                            {
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => CancelOrder(order.Id)">Cancel Order</button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<Order>? orders;
+    private bool isAdmin;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        isAdmin = authState.User.IsInRole("Admin");
+        await LoadOrders();
+    }
+
+    private async Task LoadOrders()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (user.IsInRole("Admin"))
+        {
+            orders = await OrderService.GetAllAsync();
+        }
+        else if (user.IsInRole("BusinessManager"))
+        {
+            orders = await OrderService.GetByBusinessOwnerIdAsync(userId ?? string.Empty);
+        }
+        else
+        {
+            orders = await OrderService.GetByUserIdAsync(userId ?? string.Empty);
+        }
+    }
+
+    private async Task CancelOrder(Guid id)
+    {
+        await OrderService.CancelAsync(id);
+        await LoadOrders();
+    }
+
+    private string GetBadgeClass(int statusId)
+    {
+        return statusId switch
+        {
+            1 => "bg-warning text-dark", // Pending
+            2 => "bg-info", // Confirmed
+            3 => "bg-success", // PickedUp
+            4 => "bg-danger", // Cancelled
+            _ => "bg-secondary"
+        };
+    }
+}

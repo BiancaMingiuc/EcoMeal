@@ -1,10 +1,11 @@
-﻿using EcoMeal1.Entities_CodeFirst;
+using EcoMeal1.Entities_CodeFirst;
 
 namespace EcoMeal1.Services.Interfaces
 {
     public interface IPackageService
     {
         public Task<List<Package>> GetAllAsync();
+        public Task<List<Package>> GetByBusinessIdAsync(Guid businessId);
         public Task AddAsync(Package package);
         Task<Package> GetByIdAsync(Guid id);
         Task DeleteAsync(Guid id);
