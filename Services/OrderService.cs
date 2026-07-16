@@ -23,14 +23,14 @@ namespace EcoMeal1.Services
             return await orderRepository.GetByBusinessOwnerIdAsync(ownerId);
         }
 
-        public async Task CancelAsync(Guid id)
+        public async Task CancelAsync(Guid id, bool restoreQuantity = true)
         {
             var order = await orderRepository.GetOrderById(id);
-            if (order != null && order.StatusId == 1)
+            if (order != null && (order.StatusId == 1 || order.StatusId == 2))
             {
                 order.StatusId = 4;
                 
-                if (order.OrderPackages != null && order.OrderPackages.Any())
+                if (restoreQuantity && order.OrderPackages != null && order.OrderPackages.Any())
                 {
                     foreach (var op in order.OrderPackages)
                     {
