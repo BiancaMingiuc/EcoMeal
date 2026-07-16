@@ -46,6 +46,7 @@ namespace EcoMeal1.Services
                 existingPackage.Quantity = updatedPackage.Quantity;
                 existingPackage.PickupStart = updatedPackage.PickupStart;
                 existingPackage.PickupEnd = updatedPackage.PickupEnd;
+                existingPackage.ExpirationDate = updatedPackage.ExpirationDate;
                 existingPackage.ImageURL = updatedPackage.ImageURL;
                 existingPackage.BusinessId = updatedPackage.BusinessId;
                 existingPackage.PackageTypeId = updatedPackage.PackageTypeId;

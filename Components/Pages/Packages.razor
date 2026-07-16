@@ -7,7 +7,7 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
 @inject PackageController PackageController
-@attribute [Authorize(Roles = "Admin,Customer")]
+@attribute [Authorize(Roles = "Admin,Customer,BusinessManager")]
 @inject IOrderService OrderService
 @inject AuthenticationStateProvider AuthStateProvider
 
@@ -29,20 +29,45 @@
     </div>
 }
 
-@if (!string.IsNullOrEmpty(successMessage))
+
+@if (showOrderSuccessPopup)
 {
-    <div class="alert alert-success" role="alert">
-        @successMessage
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1050;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg text-center p-4 rounded-4">
+                <div class="modal-body">
+                    <div class="success-animation mb-3">
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
+                    </div>
+                    <h3 class="fw-bold mb-3" style="font-family: 'Sora', sans-serif;">Order Confirmed!</h3>
+                    <p class="text-muted fs-5 mb-4">Your package has been successfully reserved. Check your Orders page for details!</p>
+                    <button class="btn btn-success btn-lg px-5 rounded-pill shadow-sm" @onclick="ClosePopup">Awesome!</button>
+                </div>
+            </div>
+        </div>
     </div>
 }
 
-<div class="d-flex flex-wrap gap-2 mb-4">
-    <button class="btn @(selectedBusinessTypeId == null ? "btn-success" : "btn-outline-success") rounded-pill px-4" @onclick="() => FilterByType(null)">All</button>
-    @foreach (var type in Enum.GetValues<EcoMeal1.Enums.BusinessesTypeEnum>())
-    {
-        int typeId = (int)type;
-        <button class="btn @(selectedBusinessTypeId == typeId ? "btn-success" : "btn-outline-success") rounded-pill px-3" @onclick="() => FilterByType(typeId)">@type.ToString()</button>
-    }
+<div class="d-flex flex-wrap align-items-center gap-3 mb-4">
+    <div class="d-flex flex-wrap gap-2">
+        <button class="btn @(selectedBusinessTypeId == null ? "btn-success" : "btn-outline-success") rounded-pill px-4" @onclick="() => FilterByType(null)">All</button>
+        @foreach (var type in Enum.GetValues<EcoMeal1.Enums.BusinessesTypeEnum>())
+        {
+            int typeId = (int)type;
+            <button class="btn @(selectedBusinessTypeId == typeId ? "btn-success" : "btn-outline-success") rounded-pill px-3" @onclick="() => FilterByType(typeId)">@type.ToString()</button>
+        }
+    </div>
+
+    <div class="ms-md-auto d-flex align-items-center gap-2">
+        <span class="text-muted small fw-bold text-uppercase text-nowrap">Package Type:</span>
+        <select class="form-select rounded-pill border-success" style="width: 220px;" @onchange="OnPackageTypeChanged">
+            <option value="">All Types</option>
+            @foreach (var type in Enum.GetValues<EcoMeal1.Enums.PackageTypeEnum>())
+            {
+                <option value="@((int)type)">@type.ToString()</option>
+            }
+        </select>
+    </div>
 </div>
 
 @if (packages == null)
@@ -102,14 +127,13 @@ else
                                 </small>
                             </div>
                         </div>
-                        <AuthorizeView Roles="Admin,BusinessManager">
-                            <Authorized>
-                                <div class="mt-3 d-flex justify-content-between">
-                                    <a href="/packages/create/@pkg.Id" class="btn btn-sm btn-outline-primary">Edit</a>
-                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => DeletePackage(pkg.Id)">Delete</button>
-                                </div>
-                            </Authorized>
-                        </AuthorizeView>
+                        @if (isAdmin || (pkg.Businesses?.OwnerId == currentUserId))
+                        {
+                            <div class="mt-3 d-flex justify-content-between">
+                                <a href="/packages/create/@pkg.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => DeletePackage(pkg.Id)">Delete</button>
+                            </div>
+                        }
 
                         <div class="mt-3">
                             <label class="form-label small">Quantity</label>
@@ -127,27 +151,74 @@ else
 @code {
     private List<Package>? packages;
     private int? selectedBusinessTypeId = null;
+    private int? selectedPackageTypeId = null;
     private Dictionary<Guid, int> selectedQuantities = new();
     private string? errorMessage;
-    private string? successMessage;
     private bool isAdminOrManager;
+    private bool isAdmin;
+    private bool isBusinessManager;
+    private string? currentUserId;
+    private bool showOrderSuccessPopup = false;
+
+    private void ClosePopup()
+    {
+        showOrderSuccessPopup = false;
+    }
 
     private void FilterByType(int? typeId)
     {
         selectedBusinessTypeId = typeId;
     }
 
+    private void OnPackageTypeChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int typeId))
+        {
+            selectedPackageTypeId = typeId;
+        }
+        else
+        {
+            selectedPackageTypeId = null;
+        }
+    }
+
     private IEnumerable<Package> GetFilteredPackages()
     {
         if (packages == null) return new List<Package>();
-        if (selectedBusinessTypeId == null) return packages;
-        return packages.Where(p => p.Businesses != null && p.Businesses.BusinessTypeId == selectedBusinessTypeId);
+        
+        var query = packages.AsEnumerable();
+        
+        if (selectedBusinessTypeId != null)
+        {
+            query = query.Where(p => p.Businesses != null && p.Businesses.BusinessTypeId == selectedBusinessTypeId);
+        }
+        
+        if (selectedPackageTypeId != null)
+        {
+            query = query.Where(p => p.PackageTypeId == selectedPackageTypeId);
+        }
+        
+        return query;
     }
+
+
 
     protected override async Task OnInitializedAsync()
     {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        isAdmin = user.IsInRole("Admin");
+        isBusinessManager = user.IsInRole("BusinessManager");
+        isAdminOrManager = isAdmin || isBusinessManager;
+        currentUserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
         var result = await PackageController.GetAll();
         packages = result.Value;
+
+        if (isBusinessManager && !isAdmin)
+        {
+            packages = packages?.Where(p => p.Businesses?.OwnerId == currentUserId).ToList();
+        }
         
         if (packages != null)
         {
@@ -156,10 +227,6 @@ else
                 selectedQuantities[p.Id] = 1;
             }
         }
-
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        isAdminOrManager = user.IsInRole("Admin") || user.IsInRole("BusinessManager");
     }
 
     private async Task DeletePackage(Guid id)
@@ -172,7 +239,7 @@ else
     private async Task PlaceDirectOrder(Package package)
     {
         errorMessage = null;
-        successMessage = null;
+        
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         
@@ -212,7 +279,7 @@ else
 
             await OrderService.AddAsync(newOrder);
             
-            successMessage = "Order placed successfully!";
+            showOrderSuccessPopup = true;
             
             var result = await PackageController.GetAll();
             packages = result.Value;
@@ -226,3 +293,15 @@ else
         }
     }
 }
+
+<style>
+    @@keyframes scaleIn {
+        0% { transform: scale(0); opacity: 0; }
+        60% { transform: scale(1.2); }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    .success-animation i {
+        animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        display: inline-block;
+    }
+</style>

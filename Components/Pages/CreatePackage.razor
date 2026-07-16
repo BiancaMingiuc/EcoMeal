@@ -148,6 +148,13 @@
             var existing = (await PackageController.GetById(Id.Value)).Value;
             if (existing != null)
             {
+                var targetBusiness = allBusinesses?.FirstOrDefault(b => b.Id == existing.BusinessId);
+                if (!user.IsInRole("Admin") && targetBusiness?.OwnerId != userId)
+                {
+                    NavigationManager.NavigateTo("/packages");
+                    return;
+                }
+
                 model.Name = existing.Name;
                 model.Description = existing.Description;
                 model.Price = existing.Price;
@@ -178,11 +185,26 @@
                 return;
             }
 
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var isAdmin = user.IsInRole("Admin");
+
+            if (!isAdmin)
+            {
+                var validBusiness = businesses?.FirstOrDefault(b => b.Id == model.BusinessId);
+                if (validBusiness == null || validBusiness.OwnerId != userId)
+                {
+                    errorMessage = "You are not authorized to add packages to this business.";
+                    return;
+                }
+            }
+
             var today = DateTime.Today;
             
             var package = new Package
             {
-                Id = Guid.NewGuid(),
+                Id = Id ?? Guid.NewGuid(),
                 BusinessId = model.BusinessId,
                 PackageTypeId = model.PackageTypeId,
                 Name = model.Name ?? string.Empty,

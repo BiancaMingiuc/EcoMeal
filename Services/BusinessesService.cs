@@ -46,6 +46,7 @@ namespace EcoMeal1.Services
                 existingBusiness.Address = updatedBusiness.Address;
                 existingBusiness.ImageURL = updatedBusiness.ImageURL;
                 existingBusiness.BusinessTypeId = updatedBusiness.BusinessTypeId;
+                existingBusiness.OwnerId = updatedBusiness.OwnerId;
 
                 await businessesRepository.SaveChangesAsync();
             }

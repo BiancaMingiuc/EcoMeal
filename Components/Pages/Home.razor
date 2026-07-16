@@ -34,8 +34,6 @@
 
 
 <div class="explore-section mt-5 mb-5" id="explore">
-    <h2 class="section-title">Explore Restaurants</h2>
-    
     <div class="d-flex flex-wrap gap-2 mb-4">
         <button class="btn @(selectedBusinessTypeId == null ? "btn-success" : "btn-outline-success") rounded-pill px-4" @onclick="() => FilterByType(null)">All</button>
         @foreach (var type in Enum.GetValues<EcoMeal1.Enums.BusinessesTypeEnum>())
@@ -252,6 +250,7 @@
 @code {
     private List<Businesses>? businesses;
     private int? selectedBusinessTypeId = null;
+
 
     protected override async Task OnInitializedAsync()
     {
