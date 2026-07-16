@@ -9,87 +9,29 @@
 
 <PageTitle>EcoMeal</PageTitle>
 
-<div class="home-hero">
-    <div class="hero-content">
+<div class="home-banner d-flex flex-column flex-md-row align-items-center justify-content-between shadow-sm">
+    <div class="banner-text">
         <AuthorizeView>
             <Authorized>
-                <div class="hero-badge">Welcome back, @(context.User.Identity?.Name?.Split('@')[0])!</div>
+                <span class="badge bg-white text-success mb-2 px-3 py-2 rounded-pill shadow-sm">
+                    <i class="bi bi-person-circle me-1"></i> Welcome back, @(context.User.Identity?.Name?.Split('@')[0])!
+                </span>
             </Authorized>
         </AuthorizeView>
-        
-        <h1 class="hero-title">Save the Planet.<br/><span class="text-highlight">Save your Wallet.</span></h1>
-        
-        <p class="hero-subtitle">EcoMeal connects you with surplus food from local restaurants and supermarkets at heavily discounted prices. Enjoy delicious meals, reduce food waste, and make a real difference today.</p>
-        
-        <div class="hero-stats">
-            <div class="stat-item">
-                <span class="stat-icon"><i class="bi bi-globe-americas"></i></span>
-                <span class="stat-text">Reduce Waste</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-icon"><i class="bi bi-wallet2"></i></span>
-                <span class="stat-text">Save Money</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-icon"><i class="bi bi-egg-fried"></i></span>
-                <span class="stat-text">Eat Well</span>
-            </div>
+        <h1 class="banner-title mb-1">Reduce food waste. <span class="text-highlight">Save your wallet.</span></h1>
+        <p class="banner-subtitle mb-0 text-white-50">Join the movement against food waste with EcoMeal.</p>
+    </div>
+    
+    <div class="banner-stats d-none d-md-flex gap-3 mt-3 mt-md-0">
+        <div class="mini-stat">
+            <i class="bi bi-globe-americas"></i> Reduce Waste
+        </div>
+        <div class="mini-stat">
+            <i class="bi bi-wallet2"></i> Save Money
         </div>
     </div>
 </div>
 
-<div class="dashboard-section">
-    <h2 class="section-title">Quick Actions</h2>
-    <div class="action-grid">
-        <a href="/packages" class="premium-card">
-            <div class="card-icon-wrapper bg-green">
-                <i class="bi bi-box-seam"></i>
-            </div>
-            <div class="card-text">
-                <h3>Browse Packages</h3>
-                <p>Discover fresh, discounted surplus food near you.</p>
-            </div>
-            <div class="card-arrow"><i class="bi bi-arrow-right"></i></div>
-        </a>
-
-        <AuthorizeView Roles="Admin" Context="adminCtx">
-            <Authorized>
-                <a href="/businesses" class="premium-card">
-                    <div class="card-icon-wrapper bg-blue">
-                        <i class="bi bi-shop"></i>
-                    </div>
-                    <div class="card-text">
-                        <h3>Manage Businesses</h3>
-                        <p>View and manage all registered partner stores.</p>
-                    </div>
-                    <div class="card-arrow"><i class="bi bi-arrow-right"></i></div>
-                </a>
-
-                <a href="/packages/create" class="premium-card">
-                    <div class="card-icon-wrapper bg-orange">
-                        <i class="bi bi-plus-circle"></i>
-                    </div>
-                    <div class="card-text">
-                        <h3>Add New Package</h3>
-                        <p>Create new food rescue packages for businesses.</p>
-                    </div>
-                    <div class="card-arrow"><i class="bi bi-arrow-right"></i></div>
-                </a>
-
-                <a href="/admin/users" class="premium-card">
-                    <div class="card-icon-wrapper bg-purple">
-                        <i class="bi bi-people"></i>
-                    </div>
-                    <div class="card-text">
-                        <h3>User Management</h3>
-                        <p>Administrate user roles and system access.</p>
-                    </div>
-                    <div class="card-arrow"><i class="bi bi-arrow-right"></i></div>
-                </a>
-            </Authorized>
-        </AuthorizeView>
-    </div>
-</div>
 
 <div class="explore-section mt-5 mb-5" id="explore">
     <h2 class="section-title">Explore Restaurants</h2>
@@ -138,178 +80,106 @@
     }
 </div>
 
+<div class="how-it-works-section mt-5 pt-4 pb-5 text-center">
+    <h2 class="section-title mb-5" style="font-size: 2.2rem;">How it works</h2>
+    <div class="row g-4 mt-3">
+        <div class="col-md-4">
+            <div class="step-icon-wrapper mb-4 mx-auto">
+                <i class="bi bi-search"></i>
+            </div>
+            <h4 class="fw-bold mb-3" style="font-family: 'Sora', sans-serif;">Search in restaurants</h4>
+            <p class="text-muted px-2 px-md-4">
+                Explore our list and <span class="highlight-green">discover surprise packages</span> available at nearby restaurants and stores.
+            </p>
+        </div>
+
+        <div class="col-md-4">
+            <div class="step-icon-wrapper mb-4 mx-auto">
+                <i class="bi bi-bag-plus"></i>
+            </div>
+            <h4 class="fw-bold mb-3" style="font-family: 'Sora', sans-serif;">Reserve a package</h4>
+            <p class="text-muted px-2 px-md-4">
+                Choose your desired quantity and <span class="highlight-green">place your order instantly</span>, rescuing food from waste and saving money.
+            </p>
+        </div>
+
+        <div class="col-md-4">
+            <div class="step-icon-wrapper mb-4 mx-auto">
+                <i class="bi bi-shop-window"></i>
+            </div>
+            <h4 class="fw-bold mb-3" style="font-family: 'Sora', sans-serif;">Go and Pick Up</h4>
+            <p class="text-muted px-2 px-md-4">
+                Go to the location within the specified timeframe, show your confirmed order and <span class="highlight-green">enjoy your delicious food!</span>
+            </p>
+        </div>
+    </div>
+</div>
+
 <style>
-    /* Hero Section */
-    .home-hero {
-        background: linear-gradient(135deg, #022c22 0%, #064e3b 100%);
-        border-radius: 20px;
-        padding: 4rem 3.5rem;
+    .home-banner {
+        background: linear-gradient(135deg, #022c22 0%, #059669 100%);
+        border-radius: 16px;
+        padding: 1.5rem 2.5rem;
         color: white;
-        margin-bottom: 3rem;
+        margin-bottom: 2rem;
         position: relative;
         overflow: hidden;
-        box-shadow: 0 20px 40px rgba(6, 78, 59, 0.15);
     }
     
-    .home-hero::before {
+    .home-banner::after {
         content: '';
         position: absolute;
-        top: -50%;
-        right: -10%;
-        width: 600px;
-        height: 600px;
+        top: -50px; right: -50px;
+        width: 300px; height: 300px;
         background: radial-gradient(circle, rgba(52, 211, 153, 0.15) 0%, rgba(255,255,255,0) 70%);
-        border-radius: 50%;
         pointer-events: none;
+        border-radius: 50%;
     }
 
-    .hero-content {
+    .banner-text {
         position: relative;
-        z-index: 1;
-        max-width: 650px;
+        z-index: 2;
     }
 
-    .hero-badge {
-        display: inline-block;
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        padding: 0.5rem 1.2rem;
-        border-radius: 50px;
-        font-size: 0.9rem;
-        font-weight: 500;
-        margin-bottom: 2rem;
-        color: #d1fae5;
-    }
-
-    .hero-title {
-        font-size: 3.5rem;
+    .banner-title {
+        font-size: 2rem;
         font-weight: 800;
-        line-height: 1.1;
-        margin-bottom: 1.5rem;
         font-family: 'Sora', sans-serif;
-        letter-spacing: -1px;
+        letter-spacing: -0.5px;
     }
 
     .text-highlight {
-        color: #34d399; /* bright emerald */
-    }
-
-    .hero-subtitle {
-        font-size: 1.15rem;
-        line-height: 1.6;
         color: #6ee7b7;
-        margin-bottom: 2.5rem;
-        max-width: 580px;
     }
 
-    .hero-stats {
-        display: flex;
-        gap: 2.5rem;
+    .banner-subtitle {
+        font-size: 0.95rem;
     }
 
-    .stat-item {
-        display: flex;
-        align-items: center;
-        gap: 0.6rem;
+    .mini-stat {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        padding: 0.6rem 1.2rem;
+        border-radius: 12px;
+        font-size: 0.9rem;
         font-weight: 600;
-        font-size: 1rem;
-        color: #fff;
-    }
-    .stat-icon {
-        font-size: 1.1rem;
         display: flex;
         align-items: center;
-        justify-content: center;
-        width: 32px;
-        height: 32px;
-        background: rgba(52, 211, 153, 0.15);
-        border-radius: 50%;
-        color: #34d399;
+        gap: 0.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        position: relative;
+        z-index: 2;
+        transition: transform 0.2s;
+    }
+    .mini-stat:hover {
+        transform: translateY(-2px);
+    }
+    .mini-stat i {
+        color: #a7f3d0;
+        font-size: 1.2rem;
     }
 
-    /* Dashboard Actions */
-    .dashboard-section {
-        margin-top: 2rem;
-    }
-
-    .section-title {
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: #1f2937;
-        margin-bottom: 1.5rem;
-        font-family: 'Sora', sans-serif;
-    }
-
-    .action-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 1.5rem;
-    }
-
-    .premium-card {
-        display: flex;
-        align-items: center;
-        background: #ffffff;
-        border: 1px solid #e5e7eb;
-        border-radius: 16px;
-        padding: 1.5rem;
-        text-decoration: none !important;
-        color: inherit !important;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-    }
-
-    .premium-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-        border-color: #10b981;
-    }
-
-    .card-icon-wrapper {
-        width: 52px;
-        height: 52px;
-        border-radius: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.6rem;
-        margin-right: 1.25rem;
-        flex-shrink: 0;
-    }
-
-    .bg-green { background: #d1fae5; color: #10b981; }
-    .bg-blue { background: #dbeafe; color: #2563eb; }
-    .bg-orange { background: #ffedd5; color: #ea580c; }
-    .bg-purple { background: #f3e8ff; color: #9333ea; }
-
-    .card-text h3 {
-        font-size: 1.1rem;
-        font-weight: 700;
-        margin: 0 0 0.3rem 0;
-        color: #111827;
-        font-family: 'Sora', sans-serif;
-    }
-
-    .card-text p {
-        font-size: 0.88rem;
-        color: #6b7280;
-        margin: 0;
-        line-height: 1.4;
-    }
-
-    .card-arrow {
-        margin-left: auto;
-        color: #9ca3af;
-        font-size: 1.3rem;
-        transition: transform 0.2s, color 0.2s;
-    }
-
-    .premium-card:hover .card-arrow {
-        transform: translateX(4px);
-        color: #10b981;
-    }
 
     .explore-card {
         transition: transform 0.2s, box-shadow 0.2s;
@@ -319,6 +189,55 @@
         box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
     }
     
+    .how-it-works-section {
+        margin-top: 4rem;
+        margin-bottom: 3rem;
+    }
+
+    .step-icon-wrapper {
+        width: 120px;
+        height: 120px;
+        background-color: #d1fae5; /* Soft mint green */
+        border-radius: 50% 40% 60% 40% / 50% 60% 40% 50%; /* Playful, organic blob shape */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3.5rem;
+        color: #059669; /* Emerald green icon */
+        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2);
+        position: relative;
+        transition: transform 0.3s;
+    }
+    
+    .step-icon-wrapper:hover {
+        transform: scale(1.05) rotate(-5deg);
+    }
+    
+    .step-icon-wrapper i {
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Small decorative star */
+    .step-icon-wrapper::after {
+        content: '✦';
+        position: absolute;
+        top: 0px;
+        right: -15px;
+        font-size: 1.5rem;
+        color: #34d399; /* Bright green */
+    }
+
+    .highlight-green {
+        background-color: #a7f3d0; /* Soft green highlight */
+        padding: 0 6px;
+        border-radius: 4px;
+        font-weight: 500;
+        color: #064e3b; /* Dark text for contrast */
+        display: inline-block;
+        line-height: 1.4;
+        margin-top: 4px;
+    }
 </style>
 
 @code {
