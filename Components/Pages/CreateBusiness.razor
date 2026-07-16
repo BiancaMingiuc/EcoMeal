@@ -8,7 +8,7 @@
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
-@attribute [Authorize(Roles = "Admin")]
+@attribute [Authorize(Roles = "Admin,BusinessManager")]
 @inject AuthenticationStateProvider AuthStateProvider
 @inject IAuthService AuthService
 @inject BusinessesController BusinessesControler
