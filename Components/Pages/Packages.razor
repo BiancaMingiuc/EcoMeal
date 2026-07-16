@@ -36,18 +36,27 @@
     </div>
 }
 
+<div class="d-flex flex-wrap gap-2 mb-4">
+    <button class="btn @(selectedBusinessTypeId == null ? "btn-success" : "btn-outline-success") rounded-pill px-4" @onclick="() => FilterByType(null)">All</button>
+    @foreach (var type in Enum.GetValues<EcoMeal1.Enums.BusinessesTypeEnum>())
+    {
+        int typeId = (int)type;
+        <button class="btn @(selectedBusinessTypeId == typeId ? "btn-success" : "btn-outline-success") rounded-pill px-3" @onclick="() => FilterByType(typeId)">@type.ToString()</button>
+    }
+</div>
+
 @if (packages == null)
 {
     <p><em>Loading...</em></p>
 }
-else if (!packages.Any())
+else if (!GetFilteredPackages().Any())
 {
-    <p>No packages found.</p>
+    <p>No packages found for the selected category.</p>
 }
 else
 {
     <div class="row g-3">
-        @foreach (var pkg in packages)
+        @foreach (var pkg in GetFilteredPackages())
         {
             if (!isAdminOrManager && pkg.Quantity<=0)
             {
@@ -55,7 +64,7 @@ else
             }
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="card h-100 shadow-sm">
-                    <img src="@pkg.ImageURL" class="card-img-top" alt="@pkg.Name" style="height:200px; object-fit:cover;" />
+                    <img src="@(string.IsNullOrWhiteSpace(pkg.ImageURL) ? "https://placehold.co/600x400/059669/ffffff?text=EcoMeal" : pkg.ImageURL)" class="card-img-top" alt="@pkg.Name" style="height:200px; object-fit:cover;" />
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <div>
@@ -117,10 +126,23 @@ else
 
 @code {
     private List<Package>? packages;
+    private int? selectedBusinessTypeId = null;
     private Dictionary<Guid, int> selectedQuantities = new();
     private string? errorMessage;
     private string? successMessage;
     private bool isAdminOrManager;
+
+    private void FilterByType(int? typeId)
+    {
+        selectedBusinessTypeId = typeId;
+    }
+
+    private IEnumerable<Package> GetFilteredPackages()
+    {
+        if (packages == null) return new List<Package>();
+        if (selectedBusinessTypeId == null) return packages;
+        return packages.Where(p => p.Businesses != null && p.Businesses.BusinessTypeId == selectedBusinessTypeId);
+    }
 
     protected override async Task OnInitializedAsync()
     {

@@ -36,23 +36,32 @@
 <div class="explore-section mt-5 mb-5" id="explore">
     <h2 class="section-title">Explore Restaurants</h2>
     
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <button class="btn @(selectedBusinessTypeId == null ? "btn-success" : "btn-outline-success") rounded-pill px-4" @onclick="() => FilterByType(null)">All</button>
+        @foreach (var type in Enum.GetValues<EcoMeal1.Enums.BusinessesTypeEnum>())
+        {
+            int typeId = (int)type;
+            <button class="btn @(selectedBusinessTypeId == typeId ? "btn-success" : "btn-outline-success") rounded-pill px-3" @onclick="() => FilterByType(typeId)">@type.ToString()</button>
+        }
+    </div>
+    
     @if (businesses == null)
     {
         <p><em>Loading...</em></p>
     }
-    else if (!businesses.Any())
+    else if (!GetFilteredBusinesses().Any())
     {
-        <p>No restaurants found.</p>
+        <p>No restaurants found for the selected category.</p>
     }
     else
     {
         <div class="row g-4">
-            @foreach (var b in businesses)
+            @foreach (var b in GetFilteredBusinesses())
             {
                 var availablePackages = b.Packages?.Count(p => p.Quantity > 0) ?? 0;
                 <div class="col-12 col-md-6 col-lg-4">
                     <div class="card h-100 shadow-sm border-0 explore-card">
-                        <img src="@b.ImageURL" class="card-img-top" alt="@b.Name" style="height:200px; object-fit:cover;" />
+                        <img src="@(string.IsNullOrWhiteSpace(b.ImageURL) ? "https://placehold.co/600x400/059669/ffffff?text=EcoMeal" : b.ImageURL)" class="card-img-top" alt="@b.Name" style="height:200px; object-fit:cover;" />
                         <div class="card-body d-flex flex-column">
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <h5 class="card-title fw-bold mb-0" style="font-family: 'Sora', sans-serif;">@b.Name</h5>
@@ -242,9 +251,22 @@
 
 @code {
     private List<Businesses>? businesses;
+    private int? selectedBusinessTypeId = null;
 
     protected override async Task OnInitializedAsync()
     {
         businesses = await BusinessesService.GetAllWithPackagesAsync();
+    }
+
+    private void FilterByType(int? typeId)
+    {
+        selectedBusinessTypeId = typeId;
+    }
+
+    private IEnumerable<Businesses> GetFilteredBusinesses()
+    {
+        if (businesses == null) return new List<Businesses>();
+        if (selectedBusinessTypeId == null) return businesses;
+        return businesses.Where(b => b.BusinessTypeId == selectedBusinessTypeId);
     }
 }
