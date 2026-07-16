@@ -4,6 +4,8 @@
 @using EcoMeal1.Services.Interfaces
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
 @inject IOrderService OrderService
 @inject AuthenticationStateProvider AuthStateProvider
 
@@ -17,6 +19,19 @@
     </Authorized>
 </AuthorizeView>
 
+<div class="row mb-4">
+    <div class="col-md-4">
+        <label for="statusFilter" class="form-label fw-bold">Filter by Status:</label>
+        <select id="statusFilter" class="form-select" @bind="selectedStatusFilter" @bind:after="ApplyFilter">
+            <option value="0">All Statuses</option>
+            <option value="1">Pending</option>
+            <option value="2">Confirmed</option>
+            <option value="3">Picked Up</option>
+            <option value="4">Cancelled</option>
+        </select>
+    </div>
+</div>
+
 @if (orders == null)
 {
     <p><em>Loading...</em></p>
@@ -28,21 +43,21 @@ else if (!orders.Any())
 else
 {
     <div class="accordion" id="ordersAccordion">
-        @foreach (var order in orders)
+        @foreach (var order in filteredOrders)
         {
             var accordionId = $"collapse{order.Id:N}";
             var headingId = $"heading{order.Id:N}";
 
             <div class="accordion-item mb-3 border rounded shadow-sm">
                 <h2 class="accordion-header" id="@headingId">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@accordionId" aria-expanded="false" aria-controls="@accordionId">
+                    <button class="accordion-button @(expandedOrders.Contains(order.Id) ? "" : "collapsed")" type="button" @onclick="() => ToggleOrder(order.Id)">
                         <div class="d-flex w-100 justify-content-between align-items-center me-3">
                             <strong>Order #@order.OrderNumber @(isAdmin ? $"- {order.User?.Email}" : "")</strong>
                             <span class="badge @GetBadgeClass(order.StatusId) rounded-pill">@(order.Status?.Name ?? "Pending")</span>
                         </div>
                     </button>
                 </h2>
-                <div id="@accordionId" class="accordion-collapse collapse" aria-labelledby="@headingId" data-bs-parent="#ordersAccordion">
+                <div id="@accordionId" class="accordion-collapse collapse @(expandedOrders.Contains(order.Id) ? "show" : "")" aria-labelledby="@headingId" data-bs-parent="#ordersAccordion">
                     <div class="accordion-body">
                         @if (order.OrderPackages == null || !order.OrderPackages.Any())
                         {
@@ -94,7 +109,18 @@ else
                         <div class="mt-3 text-end">
                             @if (order.StatusId == 1) // Pending
                             {
+                                if (isBusinessManager || isAdmin)
+                                {
+                                    <button class="btn btn-sm btn-success me-2" @onclick="() => ConfirmOrder(order.Id)">Confirm Order</button>
+                                }
                                 <button class="btn btn-sm btn-outline-danger" @onclick="() => CancelOrder(order.Id)">Cancel Order</button>
+                            }
+                            else if (order.StatusId == 2) // Confirmed
+                            {
+                                if (isCustomer || isAdmin)
+                                {
+                                    <button class="btn btn-sm btn-primary" @onclick="() => PickUpOrder(order.Id)">Mark as Picked Up</button>
+                                }
                             }
                         </div>
                     </div>
@@ -106,12 +132,27 @@ else
 
 @code {
     private List<Order>? orders;
+    private List<Order> filteredOrders = new();
     private bool isAdmin;
+    private bool isBusinessManager;
+    private bool isCustomer;
+    private HashSet<Guid> expandedOrders = new();
+    private int selectedStatusFilter = 0;
+
+    private void ToggleOrder(Guid id)
+    {
+        if (expandedOrders.Contains(id))
+            expandedOrders.Remove(id);
+        else
+            expandedOrders.Add(id);
+    }
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         isAdmin = authState.User.IsInRole("Admin");
+        isBusinessManager = authState.User.IsInRole("BusinessManager");
+        isCustomer = authState.User.IsInRole("Customer");
         await LoadOrders();
     }
 
@@ -133,11 +174,38 @@ else
         {
             orders = await OrderService.GetByUserIdAsync(userId ?? string.Empty);
         }
+        ApplyFilter();
+    }
+
+    private void ApplyFilter()
+    {
+        if (orders == null) return;
+        
+        if (selectedStatusFilter == 0)
+        {
+            filteredOrders = orders.ToList();
+        }
+        else
+        {
+            filteredOrders = orders.Where(o => o.StatusId == selectedStatusFilter).ToList();
+        }
     }
 
     private async Task CancelOrder(Guid id)
     {
         await OrderService.CancelAsync(id);
+        await LoadOrders();
+    }
+
+    private async Task ConfirmOrder(Guid id)
+    {
+        await OrderService.ConfirmAsync(id);
+        await LoadOrders();
+    }
+
+    private async Task PickUpOrder(Guid id)
+    {
+        await OrderService.PickUpAsync(id);
         await LoadOrders();
     }
 
