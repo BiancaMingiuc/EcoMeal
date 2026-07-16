@@ -46,6 +46,26 @@ namespace EcoMeal1.Services
                 await orderRepository.SaveChangesAsync();
             }
         }
+
+        public async Task ConfirmAsync(Guid id)
+        {
+            var order = await orderRepository.GetOrderById(id);
+            if (order != null && order.StatusId == 1)
+            {
+                order.StatusId = 2; // Confirmed
+                await orderRepository.SaveChangesAsync();
+            }
+        }
+
+        public async Task PickUpAsync(Guid id)
+        {
+            var order = await orderRepository.GetOrderById(id);
+            if (order != null && order.StatusId == 2)
+            {
+                order.StatusId = 3; // PickedUp
+                await orderRepository.SaveChangesAsync();
+            }
+        }
         public async Task AddAsync(Order order)
         {
             await orderRepository.AddAsync(order);

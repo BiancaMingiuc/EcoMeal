@@ -8,6 +8,8 @@ namespace EcoMeal1.Services.Interfaces
         public Task<List<Order>> GetByUserIdAsync(string userId);
         public Task<List<Order>> GetByBusinessOwnerIdAsync(string ownerId);
         public Task CancelAsync(Guid id);
+        public Task ConfirmAsync(Guid id);
+        public Task PickUpAsync(Guid id);
         public Task AddAsync(Order order);
         Task<Order> GetByIdAsync(Guid id);
         Task DeleteAsync(Guid id);
