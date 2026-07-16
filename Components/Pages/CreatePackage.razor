@@ -79,13 +79,17 @@
                         </div>
 
                         <div class="row mb-3">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label for="pickupStart" class="form-label">Pickup Start Time</label>
                                 <InputDate Type="InputDateType.Time" id="pickupStart" class="form-control" @bind-Value="model.PickupStart" />
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label for="pickupEnd" class="form-label">Pickup End Time</label>
                                 <InputDate Type="InputDateType.Time" id="pickupEnd" class="form-control" @bind-Value="model.PickupEnd" />
+                            </div>
+                            <div class="col-md-4">
+                                <label for="expirationDate" class="form-label">Expiration Date/Time</label>
+                                <InputDate Type="InputDateType.DateTimeLocal" id="expirationDate" class="form-control" @bind-Value="model.ExpirationDate" />
                             </div>
                         </div>
 
@@ -114,7 +118,8 @@
     private PackageFormModel model = new PackageFormModel() 
     { 
         PickupStart = new DateTime(1, 1, 1, 8, 0, 0), 
-        PickupEnd = new DateTime(1, 1, 1, 17, 0, 0)
+        PickupEnd = new DateTime(1, 1, 1, 17, 0, 0),
+        ExpirationDate = DateTime.Now.AddDays(1)
     };
     
     private List<Businesses>? businesses;
@@ -149,6 +154,7 @@
                 model.Quantity = existing.Quantity;
                 model.PickupStart = existing.PickupStart;
                 model.PickupEnd = existing.PickupEnd;
+                model.ExpirationDate = existing.ExpirationDate;
                 model.ImageURL = existing.ImageURL;
                 model.BusinessId = existing.BusinessId;
                 model.PackageTypeId = existing.PackageTypeId;
@@ -185,6 +191,7 @@
                 Quantity = model.Quantity,
                 PickupStart = new DateTime(today.Year, today.Month, today.Day, model.PickupStart.Hour, model.PickupStart.Minute, 0),
                 PickupEnd = new DateTime(today.Year, today.Month, today.Day, model.PickupEnd.Hour, model.PickupEnd.Minute, 0),
+                ExpirationDate = model.ExpirationDate,
                 ImageURL = model.ImageURL ?? string.Empty
             };
 
@@ -219,6 +226,7 @@
         public int Quantity { get; set; }
         public DateTime PickupStart { get; set; }
         public DateTime PickupEnd { get; set; }
+        public DateTime ExpirationDate { get; set; }
         public string? ImageURL { get; set; }
     }
 }

@@ -53,6 +53,8 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<BusinessesController>();
 builder.Services.AddScoped<PackageController>();
 
+builder.Services.AddHostedService<ExpiredOrdersWorker>();
+
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
