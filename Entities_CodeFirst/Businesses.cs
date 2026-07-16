@@ -9,6 +9,9 @@ namespace EcoMeal1.Entities_CodeFirst
         public Guid Id { get; set; }
         public required string Name { get; set; }
         public required string Description { get; set; }
+        public string? OwnerId { get; set; }
+        [ForeignKey("OwnerId")]
+        public virtual EcoMealUser Owner { get; set; }
         public required string Address { get; set; }
         public required string ImageURL { get; set; }
         public required int BusinessTypeId { get; set; }

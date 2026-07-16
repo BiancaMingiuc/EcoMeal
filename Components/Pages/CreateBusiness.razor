@@ -4,6 +4,13 @@
 @using EcoMeal1.Enums
 @using EcoMeal1.Entities_CodeFirst
 @using EcoMeal1.Controllers
+@using EcoMeal1.Services.Interfaces
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@attribute [Authorize(Roles = "Admin")]
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IAuthService AuthService
 @inject BusinessesController BusinessesControler
 @inject NavigationManager NavigationManager
 
@@ -14,7 +21,7 @@
         <div class="col-md-8">
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
-                    <h3 class="card-title mb-0">Create New Business</h3>
+                    <h3 class="card-title mb-0">@(Id.HasValue ? "Edit Business" : "Create New Business")</h3>
                 </div>
                 <div class="card-body">
                     
@@ -43,6 +50,7 @@
                             </div>
                         </div>
 
+                  
                         <div class="mb-3">
                             <label for="description" class="form-label">Description</label>
                             <InputTextArea id="description" class="form-control" @bind-Value="model.Description" rows="3" />
@@ -76,14 +84,29 @@
 
     private BusinessFormModel model = new BusinessFormModel();
     private string? errorMessage;
+    private List<EcoMealUser> owners = new();
 
     protected override async Task OnInitializedAsync()
     {
+        var allUsers = await AuthService.GetAllUsersWithRolesAsync();
+        owners = allUsers.Where(u => u.Roles.Contains("BusinessManager")).Select(u => u.User).ToList();
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+        var isAdmin = user.IsInRole("Admin");
+
         if (Id.HasValue)
         {
             var existing = (await BusinessesControler.GetById(Id.Value)).Value;
             if (existing != null)
             {
+                if (!isAdmin && existing.OwnerId != userId)
+                {
+                    NavigationManager.NavigateTo("/businesses");
+                    return;
+                }
+                
                 model.Name = existing.Name;
                 model.Description = existing.Description;
                 model.Address = existing.Address;
@@ -102,18 +125,31 @@
                 return;
             }
 
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+            var isAdmin = user.IsInRole("Admin");
+
             var business = new Businesses
             {
-                Id = Id?? Guid.NewGuid(),
+                Id = Id ?? Guid.NewGuid(),
                 Name = model.Name ?? string.Empty,
                 Description = model.Description ?? string.Empty,
                 Address = model.Address ?? string.Empty,
                 ImageURL = model.ImageURL ?? string.Empty,
-                BusinessTypeId = (int)model.BusinessTypeId
+                BusinessTypeId = (int)model.BusinessTypeId,
+                OwnerId = userId 
             };
             
             if (Id.HasValue)
             {
+                var existing = (await BusinessesControler.GetById(Id.Value)).Value;
+                if (existing == null || (!isAdmin && existing.OwnerId != userId))
+                {
+                     errorMessage = "Unauthorized to edit this business.";
+                     return;
+                }
+                business.OwnerId = existing.OwnerId; // Preserve original owner
                 await BusinessesControler.UpdateAsync(Id.Value, business);
             }
             else

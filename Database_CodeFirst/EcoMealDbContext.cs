@@ -1,4 +1,4 @@
-﻿using EcoMeal1.Entities_CodeFirst;
+using EcoMeal1.Entities_CodeFirst;
 using EcoMeal1.Enums;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -37,16 +37,24 @@ namespace EcoMeal1.Database_CodeFirst
                 .HasForeignKey(o => o.StatusId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+
             builder.Entity<Status>().HasData(
                 new Status { Id = 1, Name = "Pending" },
-                new Status { Id = 2, Name = "Shipped" },
-                new Status { Id = 3, Name = "Delivered" }
+                new Status { Id = 2, Name = "Confirmed" },
+                new Status { Id = 3, Name = "PickedUp" },
+                new Status { Id = 4, Name = "Cancelled" }
             );
 
             builder.Entity<Businesses>()
                 .HasOne(b => b.BusinessType)
                 .WithMany()
                 .HasForeignKey(b => b.BusinessTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Businesses>()
+                .HasOne(b => b.Owner)
+                .WithMany()
+                .HasForeignKey(b => b.OwnerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<BusinessesType>().HasData(

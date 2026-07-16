@@ -1,4 +1,4 @@
-﻿using EcoMeal1.Database_CodeFirst;
+using EcoMeal1.Database_CodeFirst;
 using EcoMeal1.Entities_CodeFirst;
 using EcoMeal1.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +10,14 @@ namespace EcoMeal1.Repositories
         public async Task<List<Businesses>> GetAllAsync()
         {
             return await context.Businesses.ToListAsync();
+        }
+
+        public async Task<List<Businesses>> GetAllWithPackagesAsync()
+        {
+            return await context.Businesses
+                .Include(b => b.Packages)
+                .Include(b => b.BusinessType)
+                .ToListAsync();
         }
 
         public async Task<Businesses> GetBusinessById(Guid Id)

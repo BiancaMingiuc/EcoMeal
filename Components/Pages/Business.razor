@@ -4,15 +4,21 @@
 @using EcoMeal1.Entities_CodeFirst
 @using EcoMeal1.Constants
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@inject AuthenticationStateProvider AuthStateProvider
 @inject BusinessesController BusinessesControler
 @attribute [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.BusinessManager}")]
 
 <PageTitle>Businesses</PageTitle>
-
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>Businesses</h1>
-    <a href="/businesses/create" class="btn btn-primary">+ Add Business</a>
-</div>
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Businesses</h1>
+            <a href="/businesses/create" class="btn btn-primary">+ Add Business</a>
+        </div>
+    </Authorized>
+</AuthorizeView>
 
 @if(businesses is null)
 {
@@ -41,11 +47,13 @@ else
                         </p>
 
                         <p class="card-text">@b.Description</p>
-
-                        <div class="mt-3 d-flex justify-content-between">
-                            <a href="/businesses/create/@b.Id" class="btn btn-sm btn-outline-primary">Edit</a>
-                            <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteBusiness(b.Id)">Delete</button>
-                        </div>
+                        @if (isAdmin || (isBusinessManager && b.OwnerId == userId))
+                        {
+                            <div class="mt-3 d-flex justify-content-between">
+                                <a href="/businesses/create/@b.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteBusiness(b.Id)">Delete</button>
+                            </div>
+                        }
 
                     </div>
                 </div>
@@ -56,10 +64,29 @@ else
 
 @code {
     private List<Businesses>? businesses;
+    private string? userId;
+    private bool isAdmin;
+    private bool isBusinessManager;
 
     protected override async Task OnInitializedAsync()
     {
-        businesses = (await BusinessesControler.GetAll()).Value;
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        isAdmin = user.IsInRole("Admin");
+        isBusinessManager = user.IsInRole("BusinessManager");
+
+        var result = await BusinessesControler.GetAll();
+        var businessesList = result.Value;
+
+        if (isAdmin || user.IsInRole("Customer"))
+        {
+            businesses = businessesList;
+        }
+        else
+        {
+            businesses = businessesList?.Where(b => b.OwnerId == userId).ToList();
+        }
     }
 
     private async Task DeleteBusiness(Guid id)

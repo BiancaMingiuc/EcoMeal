@@ -4,9 +4,14 @@
 @using EcoMeal1.Enums
 @using EcoMeal1.Entities_CodeFirst
 @using EcoMeal1.Controllers
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@attribute [Authorize(Roles = "Admin,BusinessManager")]
 @inject PackageController PackageController
 @inject BusinessesController BusinessesControler
 @inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
 
 <h3 class="card-title mb-0">@(Id.HasValue ? "Edit Package" : "Create New Package")</h3>
 
@@ -15,7 +20,7 @@
         <div class="col-md-8">
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
-                    <h3 class="card-title mb-0">Create New Package</h3>
+                    <h3 class="card-title mb-0">@(Id.HasValue ? "Edit Package" : "Create New Package")</h3>
                 </div>
                 <div class="card-body">
                     
@@ -118,7 +123,20 @@
     protected override async Task OnInitializedAsync()
     {
         var result = await BusinessesControler.GetAll();
-        businesses = result.Value;
+        var allBusinesses = result.Value;
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (user.IsInRole("Admin"))
+        {
+            businesses = allBusinesses;
+        }
+        else
+        {
+            businesses = allBusinesses?.Where(b => b.OwnerId == userId).ToList();
+        }
 
         if (Id.HasValue)
         {

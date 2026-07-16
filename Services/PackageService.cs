@@ -1,4 +1,4 @@
-﻿using EcoMeal1.Entities_CodeFirst;
+using EcoMeal1.Entities_CodeFirst;
 using EcoMeal1.Repositories;
 using EcoMeal1.Repositories.Interfaces;
 using EcoMeal1.Services.Interfaces;
@@ -10,6 +10,11 @@ namespace EcoMeal1.Services
         public async Task<List<Package>> GetAllAsync()
         {
             return await packageRepository.GetAllAsync();
+        }
+
+        public async Task<List<Package>> GetByBusinessIdAsync(Guid businessId)
+        {
+            return await packageRepository.GetByBusinessIdAsync(businessId);
         }
 
         public async Task AddAsync(Package package)

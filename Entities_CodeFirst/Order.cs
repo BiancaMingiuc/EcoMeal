@@ -2,7 +2,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 
-
 namespace EcoMeal1.Entities_CodeFirst
 {
     public class Order

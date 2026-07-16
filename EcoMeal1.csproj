@@ -26,6 +26,7 @@
     <Content Remove="Components\Pages\Component.razor" />
     <Content Remove="Components\Pages\Component1.razor" />
     <Content Remove="Components\Pages\Restaurants.razor" />
+    <Content Remove="Components\Pages\Weather.razor" />
   </ItemGroup>
 
   <ItemGroup>

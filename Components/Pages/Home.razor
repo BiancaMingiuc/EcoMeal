@@ -2,7 +2,9 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using EcoMeal1.Controllers
 @using EcoMeal1.Services.Interfaces
+@using EcoMeal1.Entities_CodeFirst
 @attribute [Authorize]
+@inject IBusinessesService BusinessesService
 @rendermode InteractiveServer
 
 <PageTitle>EcoMeal</PageTitle>
@@ -89,17 +91,64 @@
     </div>
 </div>
 
+<div class="explore-section mt-5 mb-5" id="explore">
+    <h2 class="section-title">Explore Restaurants</h2>
+    
+    @if (businesses == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else if (!businesses.Any())
+    {
+        <p>No restaurants found.</p>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var b in businesses)
+            {
+                var availablePackages = b.Packages?.Count(p => p.Quantity > 0) ?? 0;
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm border-0 explore-card">
+                        <img src="@b.ImageURL" class="card-img-top" alt="@b.Name" style="height:200px; object-fit:cover;" />
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title fw-bold mb-0" style="font-family: 'Sora', sans-serif;">@b.Name</h5>
+                                @if (b.BusinessType != null)
+                                {
+                                    <span class="badge bg-light text-dark border">@b.BusinessType.Name</span>
+                                }
+                            </div>
+                            
+                            <p class="text-muted small mb-3">
+                                <i class="bi bi-geo-alt-fill text-danger"></i> @b.Address
+                            </p>
+                            
+                            <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top">
+                                <span class="text-success fw-semibold small">
+                                    <i class="bi bi-box-seam"></i> @availablePackages available packages
+                                </span>
+                                <a href="/business/@b.Id" class="btn btn-sm btn-outline-primary rounded-pill px-3">View Details &rarr;</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
 <style>
     /* Hero Section */
     .home-hero {
-        background: linear-gradient(135deg, #0d2b1a 0%, #1a4731 100%);
+        background: linear-gradient(135deg, #022c22 0%, #064e3b 100%);
         border-radius: 20px;
         padding: 4rem 3.5rem;
         color: white;
         margin-bottom: 3rem;
         position: relative;
         overflow: hidden;
-        box-shadow: 0 20px 40px rgba(26, 71, 49, 0.15);
+        box-shadow: 0 20px 40px rgba(6, 78, 59, 0.15);
     }
     
     .home-hero::before {
@@ -109,7 +158,7 @@
         right: -10%;
         width: 600px;
         height: 600px;
-        background: radial-gradient(circle, rgba(74, 222, 128, 0.15) 0%, rgba(255,255,255,0) 70%);
+        background: radial-gradient(circle, rgba(52, 211, 153, 0.15) 0%, rgba(255,255,255,0) 70%);
         border-radius: 50%;
         pointer-events: none;
     }
@@ -131,7 +180,7 @@
         font-size: 0.9rem;
         font-weight: 500;
         margin-bottom: 2rem;
-        color: #e0f5ea;
+        color: #d1fae5;
     }
 
     .hero-title {
@@ -144,13 +193,13 @@
     }
 
     .text-highlight {
-        color: #4ade80; /* bright green */
+        color: #34d399; /* bright emerald */
     }
 
     .hero-subtitle {
         font-size: 1.15rem;
         line-height: 1.6;
-        color: #a7f3d0;
+        color: #6ee7b7;
         margin-bottom: 2.5rem;
         max-width: 580px;
     }
@@ -175,9 +224,9 @@
         justify-content: center;
         width: 32px;
         height: 32px;
-        background: rgba(74, 222, 128, 0.15);
+        background: rgba(52, 211, 153, 0.15);
         border-radius: 50%;
-        color: #4ade80;
+        color: #34d399;
     }
 
     /* Dashboard Actions */
@@ -215,7 +264,7 @@
     .premium-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 12px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-        border-color: #4ade80;
+        border-color: #10b981;
     }
 
     .card-icon-wrapper {
@@ -230,7 +279,7 @@
         flex-shrink: 0;
     }
 
-    .bg-green { background: #dcfce7; color: #16a34a; }
+    .bg-green { background: #d1fae5; color: #10b981; }
     .bg-blue { background: #dbeafe; color: #2563eb; }
     .bg-orange { background: #ffedd5; color: #ea580c; }
     .bg-purple { background: #f3e8ff; color: #9333ea; }
@@ -259,7 +308,24 @@
 
     .premium-card:hover .card-arrow {
         transform: translateX(4px);
-        color: #16a34a;
+        color: #10b981;
+    }
+
+    .explore-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .explore-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
     }
     
 </style>
+
+@code {
+    private List<Businesses>? businesses;
+
+    protected override async Task OnInitializedAsync()
+    {
+        businesses = await BusinessesService.GetAllWithPackagesAsync();
+    }
+}

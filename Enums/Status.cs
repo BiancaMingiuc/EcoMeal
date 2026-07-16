@@ -1,9 +1,10 @@
-﻿namespace EcoMeal1.Enums
+namespace EcoMeal1.Enums
 {
     public enum StatusEnum
     {
         Pending = 1,
-        Shipped = 2,
-        Delivered = 3
+        Confirmed = 2,
+        PickedUp = 3,
+        Cancelled = 4
     }
 }

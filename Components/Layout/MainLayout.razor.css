@@ -8,19 +8,19 @@
 main { flex: 1; }
 
 .sidebar {
-    background: linear-gradient(170deg, #0d2b1a 0%, #1a4731 50%, #0d3322 100%);
+    background: linear-gradient(170deg, #022c22 0%, #064e3b 50%, #065f46 100%);
 }
 
 /* ---- Top Bar ---- */
 .top-row {
     background-color: #ffffff;
-    border-bottom: 1px solid #e0f5ea;
+    border-bottom: 1px solid #d1fae5;
     justify-content: flex-end;
     height: 3.5rem;
     display: flex;
     align-items: center;
     padding: 0 1.5rem;
-    box-shadow: 0 1px 6px rgba(46,204,113,0.08);
+    box-shadow: 0 1px 6px rgba(16,185,129,0.08);
 }
 
 .top-row ::deep a,
@@ -103,7 +103,7 @@ main { flex: 1; }
 .topbar-avatar {
     width: 30px;
     height: 30px;
-    background: #16a34a;
+    background: #10b981;
     color: white;
     border-radius: 50%;
     display: flex;
