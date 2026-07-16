@@ -28,8 +28,7 @@ namespace EcoMeal1.Services
 
             if (result.Succeeded)
             {
-                var role = AppRoles.AllRoles.Contains(request.Role) ? request.Role : AppRoles.Customer;
-                await userManager.AddToRoleAsync(user, role);
+                await userManager.AddToRoleAsync(user, AppRoles.Customer);
             }
 
             return result;

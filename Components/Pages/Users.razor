@@ -5,6 +5,7 @@
 @using EcoMeal1.Services.Interfaces
 @using Microsoft.AspNetCore.Authorization
 @inject IAuthService AuthService
+@inject IBusinessesService BusinessesService
 @attribute [Authorize(Roles = AppRoles.Admin)]
 
 <PageTitle>User Management</PageTitle>
@@ -28,6 +29,7 @@ else
                 <th>Email</th>
                 <th>Current Role</th>
                 <th>Change Role</th>
+                <th>Assign Business</th>
             </tr>
         </thead>
         <tbody>
@@ -68,6 +70,24 @@ else
                             <span class="text-muted small">Admin — cannot be modified</span>
                         }
                     </td>
+                    <td>
+                        @if (currentRole == AppRoles.BusinessManager)
+                        {
+                            <div class="d-flex gap-2 align-items-center">
+                                <select class="form-select form-select-sm" @bind="selectedBusinessId[user.Id]">
+                                    <option value="">-- Select Business --</option>
+                                    @if (allBusinesses != null)
+                                    {
+                                        @foreach (var b in allBusinesses)
+                                        {
+                                            <option value="@b.Id">@b.Name @(b.OwnerId == user.Id ? "(Owned)" : "")</option>
+                                        }
+                                    }
+                                </select>
+                                <button class="btn btn-sm btn-primary" @onclick="() => AssignBusiness(user.Id)">Assign</button>
+                            </div>
+                        }
+                    </td>
                 </tr>
             }
         </tbody>
@@ -81,11 +101,19 @@ else
 
 @code {
     private List<(EcoMealUser User, IList<string> Roles)>? users;
+    private List<Businesses>? allBusinesses;
+    private Dictionary<string, string> selectedBusinessId = new();
     private string? message;
 
     protected override async Task OnInitializedAsync()
     {
         users = await AuthService.GetAllUsersWithRolesAsync();
+        allBusinesses = await BusinessesService.GetAllAsync();
+        
+        foreach (var (u, _) in users)
+        {
+            selectedBusinessId[u.Id] = string.Empty;
+        }
     }
 
     private async Task ChangeRole(string userId, string newRole)
@@ -99,6 +127,21 @@ else
         else
         {
             message = result.Errors.FirstOrDefault()?.Description ?? "Error changing role.";
+        }
+    }
+
+    private async Task AssignBusiness(string userId)
+    {
+        if (selectedBusinessId.TryGetValue(userId, out var busIdStr) && Guid.TryParse(busIdStr, out var busId))
+        {
+            var business = await BusinessesService.GetByIdAsync(busId);
+            if (business != null)
+            {
+                business.OwnerId = userId;
+                await BusinessesService.UpdateAsync(busId, business);
+                message = $"Business '{business.Name}' successfully assigned to user.";
+                allBusinesses = await BusinessesService.GetAllAsync();
+            }
         }
     }
 }
