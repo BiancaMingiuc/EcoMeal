@@ -118,11 +118,14 @@ else
                             </div>
 
                             <div class="mt-auto">
-                                <label class="form-label small">Quantity</label>
-                                <input type="number" @bind="selectedQuantities[pkg.Id]" min="1" max="@pkg.Quantity" class="form-control mb-2" />
-                                <button class="btn btn-primary w-100 fw-bold" @onclick="() => PlaceDirectOrder(pkg)">
-                                    Order Now
-                                </button>
+                                @if (!isAdminOrManager)
+                                {
+                                    <label class="form-label small">Quantity</label>
+                                    <input type="number" @bind="selectedQuantities[pkg.Id]" min="1" max="@pkg.Quantity" class="form-control mb-2" />
+                                    <button class="btn btn-primary w-100 fw-bold" @onclick="() => PlaceDirectOrder(pkg)">
+                                        Order Now
+                                    </button>
+                                }
                             </div>
                         </div>
                     </div>
@@ -198,6 +201,7 @@ else
     private string? successMessage;
     private bool isAdmin;
     private bool isBusinessManager;
+    private bool isAdminOrManager;
     private string? currentUserId;
     private bool showOrderSuccessPopup = false;
 
@@ -212,6 +216,7 @@ else
         var user = authState.User;
         isAdmin = user.IsInRole("Admin");
         isBusinessManager = user.IsInRole("BusinessManager");
+        isAdminOrManager = isAdmin || isBusinessManager;
         currentUserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         business = await BusinessesService.GetByIdAsync(Id);
         

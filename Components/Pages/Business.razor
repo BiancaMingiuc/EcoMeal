@@ -1,13 +1,13 @@
 @page "/businesses"
 @rendermode InteractiveServer
-@using EcoMeal1.Controllers
+@using EcoMeal1.Services.Interfaces
 @using EcoMeal1.Entities_CodeFirst
 @using EcoMeal1.Constants
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
 @inject AuthenticationStateProvider AuthStateProvider
-@inject BusinessesController BusinessesControler
+@inject IBusinessesService BusinessesService
 @attribute [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.BusinessManager}")]
 
 <PageTitle>Businesses</PageTitle>
@@ -98,8 +98,7 @@ else
         isAdmin = user.IsInRole("Admin");
         isBusinessManager = user.IsInRole("BusinessManager");
 
-        var result = await BusinessesControler.GetAll();
-        var businessesList = result.Value;
+        var businessesList = await BusinessesService.GetAllAsync();
 
         if (isAdmin || user.IsInRole("Customer"))
         {
@@ -113,8 +112,8 @@ else
 
     private async Task DeleteBusiness(Guid id)
     {
-        await BusinessesControler.DeleteAsync(id);
-        businesses = (await BusinessesControler.GetAll()).Value;
+        await BusinessesService.DeleteAsync(id);
+        businesses = await BusinessesService.GetAllAsync();
     }
 
 }

@@ -11,7 +11,7 @@
 @attribute [Authorize(Roles = "Admin,BusinessManager")]
 @inject AuthenticationStateProvider AuthStateProvider
 @inject IAuthService AuthService
-@inject BusinessesController BusinessesControler
+@inject IBusinessesService BusinessesService
 @inject NavigationManager NavigationManager
 
 <h3 class="card-title mb-0">@(Id.HasValue ? "Edit Business" : "Create New Business")</h3>
@@ -98,7 +98,7 @@
 
         if (Id.HasValue)
         {
-            var existing = (await BusinessesControler.GetById(Id.Value)).Value;
+            var existing = await BusinessesService.GetByIdAsync(Id.Value);
             if (existing != null)
             {
                 if (!isAdmin && existing.OwnerId != userId)
@@ -143,18 +143,18 @@
             
             if (Id.HasValue)
             {
-                var existing = (await BusinessesControler.GetById(Id.Value)).Value;
+                var existing = await BusinessesService.GetByIdAsync(Id.Value);
                 if (existing == null || (!isAdmin && existing.OwnerId != userId))
                 {
                      errorMessage = "Unauthorized to edit this business.";
                      return;
                 }
                 business.OwnerId = existing.OwnerId; // Preserve original owner
-                await BusinessesControler.UpdateAsync(Id.Value, business);
+                await BusinessesService.UpdateAsync(Id.Value, business);
             }
             else
             {
-                await BusinessesControler.AddAsync(business);
+                await BusinessesService.AddAsync(business);
             }
             NavigationManager.NavigateTo("/businesses");
         }

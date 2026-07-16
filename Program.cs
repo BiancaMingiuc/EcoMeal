@@ -50,8 +50,6 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddControllers();
-builder.Services.AddScoped<BusinessesController>();
-builder.Services.AddScoped<PackageController>();
 
 builder.Services.AddHostedService<ExpiredOrdersWorker>();
 
