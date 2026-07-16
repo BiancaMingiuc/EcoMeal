@@ -20,22 +20,31 @@
     </Authorized>
 </AuthorizeView>
 
+<div class="d-flex flex-wrap gap-2 mb-4">
+    <button class="btn @(selectedBusinessTypeId == null ? "btn-success" : "btn-outline-success") rounded-pill px-4" @onclick="() => FilterByType(null)">All</button>
+    @foreach (var type in Enum.GetValues<EcoMeal1.Enums.BusinessesTypeEnum>())
+    {
+        int typeId = (int)type;
+        <button class="btn @(selectedBusinessTypeId == typeId ? "btn-success" : "btn-outline-success") rounded-pill px-3" @onclick="() => FilterByType(typeId)">@type.ToString()</button>
+    }
+</div>
+
 @if(businesses is null)
 {
     <p><em>Loading...</em></p>
 }
-else if (!businesses.Any())
+else if (!GetFilteredBusinesses().Any())
 {
-    <p>No businesses found.</p>
+    <p>No businesses found for the selected category.</p>
 }
 else
 {
     <div class="row g-3">
-        @foreach (var b in businesses)
+        @foreach (var b in GetFilteredBusinesses())
         {
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="card h-100 shadow-sm">
-                    <img src="@b.ImageURL" class="card-img-top" alt="@b.Name" style="height:200px; object-fit:cover;" />
+                    <img src="@(string.IsNullOrWhiteSpace(b.ImageURL) ? "https://placehold.co/600x400/059669/ffffff?text=EcoMeal" : b.ImageURL)" class="card-img-top" alt="@b.Name" style="height:200px; object-fit:cover;" />
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <h5 class="card-title mb-0">@b.Name</h5>
@@ -64,9 +73,22 @@ else
 
 @code {
     private List<Businesses>? businesses;
+    private int? selectedBusinessTypeId = null;
     private string? userId;
     private bool isAdmin;
     private bool isBusinessManager;
+
+    private void FilterByType(int? typeId)
+    {
+        selectedBusinessTypeId = typeId;
+    }
+
+    private IEnumerable<Businesses> GetFilteredBusinesses()
+    {
+        if (businesses == null) return new List<Businesses>();
+        if (selectedBusinessTypeId == null) return businesses;
+        return businesses.Where(b => b.BusinessTypeId == selectedBusinessTypeId);
+    }
 
     protected override async Task OnInitializedAsync()
     {
